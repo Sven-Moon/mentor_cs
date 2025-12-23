@@ -1,0 +1,27 @@
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# Build outputs
+bin/
+obj/
+out/
+[Bb]uild/
+[Ll]ogs/
+
+# IDE / tooling
+.idea/
+*.psess
+*.vsp
+*.vspscc
+
+# Packages
+packages/
+*.nupkg
+
+# Others
+*.cache
+*.coverage
+*.coveragexml
+*.log
