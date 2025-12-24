@@ -19,10 +19,14 @@ namespace MentoringApp.Api.Data
         {
             base.OnModelCreating(modelBuilder); // required for IdentityDbContext
 
-            // -------------------------------------
-            // PROFILE (1:1 ApplicationUser → Profile)
-            // -------------------------------------
-            modelBuilder.Entity<Profile>(entity =>
+            modelBuilder.Entity<Mentorship>()
+                .Property(m => m.RowVersion)
+                .IsRowVersion();
+
+      // -------------------------------------
+      // PROFILE (1:1 ApplicationUser → Profile)
+      // -------------------------------------
+      modelBuilder.Entity<Profile>(entity =>
             {
                 entity.HasKey(p => p.Id);
 

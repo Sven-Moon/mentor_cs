@@ -125,9 +125,11 @@ namespace MentoringApp.Api.Controllers
             mentorship.EndDate = updated.EndDate;
             mentorship.Status = updated.Status;
 
-            // If using rowversion
-            // _context.Entry(mentorship).Property("RowVersion").OriginalValue = 
-            //      updated.RowVersion;
+            // row version
+            _context.Entry(mentorship).Property("RowVersion").OriginalValue = 
+                updated.RowVersion;
+
+            // TODO: Add automatic retry / merge strategies
 
             try
             {
