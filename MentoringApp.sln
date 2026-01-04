@@ -5,6 +5,13 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MentoringApp.Api", "MentoringApp.Api\MentoringApp.Api.csproj", "{2436F400-7CA2-4C98-B188-9EDD1465AB28}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MentoringApp.Api.Tests", "MentoringApp.Api.Tests\MentoringApp.Api.Tests.csproj", "{85613BA3-D899-45BD-93DF-E95FA07E5701}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}"
+	ProjectSection(SolutionItems) = preProject
+		Directory.Packages.props = Directory.Packages.props
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,8 +34,23 @@ Global
 		{2436F400-7CA2-4C98-B188-9EDD1465AB28}.Release|x64.Build.0 = Release|Any CPU
 		{2436F400-7CA2-4C98-B188-9EDD1465AB28}.Release|x86.ActiveCfg = Release|Any CPU
 		{2436F400-7CA2-4C98-B188-9EDD1465AB28}.Release|x86.Build.0 = Release|Any CPU
+		{85613BA3-D899-45BD-93DF-E95FA07E5701}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{85613BA3-D899-45BD-93DF-E95FA07E5701}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{85613BA3-D899-45BD-93DF-E95FA07E5701}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{85613BA3-D899-45BD-93DF-E95FA07E5701}.Debug|x64.Build.0 = Debug|Any CPU
+		{85613BA3-D899-45BD-93DF-E95FA07E5701}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{85613BA3-D899-45BD-93DF-E95FA07E5701}.Debug|x86.Build.0 = Debug|Any CPU
+		{85613BA3-D899-45BD-93DF-E95FA07E5701}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{85613BA3-D899-45BD-93DF-E95FA07E5701}.Release|Any CPU.Build.0 = Release|Any CPU
+		{85613BA3-D899-45BD-93DF-E95FA07E5701}.Release|x64.ActiveCfg = Release|Any CPU
+		{85613BA3-D899-45BD-93DF-E95FA07E5701}.Release|x64.Build.0 = Release|Any CPU
+		{85613BA3-D899-45BD-93DF-E95FA07E5701}.Release|x86.ActiveCfg = Release|Any CPU
+		{85613BA3-D899-45BD-93DF-E95FA07E5701}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {16B163C7-E63C-43BE-817D-FB6793228B50}
 	EndGlobalSection
 EndGlobal

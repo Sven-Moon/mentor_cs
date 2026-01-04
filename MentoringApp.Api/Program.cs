@@ -61,3 +61,5 @@ app.UseAuthorization();
 
 
 app.Run();
+
+public partial class Program { } // For testing purposes, to allow the use of WebApplicationFactory in tests

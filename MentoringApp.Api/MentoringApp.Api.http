@@ -1,6 +1,6 @@
 @MentoringApp.Api_HostAddress = http://localhost:5233
 
-GET {{MentoringApp.Api_HostAddress}}/weatherforecast/
+GET {{MentoringApp.Api_HostAddress}}/mentoring/
 Accept: application/json
 
 ###

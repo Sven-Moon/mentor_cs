@@ -104,7 +104,8 @@ namespace MentoringApp.Api.Data
             var profile = new Profile
             {
                 UserId = adminUser.Id,
-                Name = "Admin User",
+                FirstName = "Admin",
+                LastName = "User",
                 Bio = "Platform administrator",
                 Location = "Loveland, CO",
                 CreatedAt = DateTime.UtcNow
