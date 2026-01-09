@@ -15,8 +15,11 @@ builder.Services.AddOpenApi();
 builder.Services.AddControllers();
 
 // DbContext
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+if (!builder.Environment.IsEnvironment("Testing"))
+{
+    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+}
 
 // Identity
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
@@ -46,9 +49,18 @@ builder.Services.AddAuthentication(options =>
 
 var app = builder.Build();
 
+app.UseRouting();
+
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
+    /* 
+     * 1.	Creates an endpoint (typically at /openapi/v1.json) that returns a JSON document describing your API
+     * 2.	Auto-generates documentation based on your controllers, actions, parameters, and return types
+     * 3.	Provides machine-readable API metadata that tools can consume
+     * builder.Services.AddOpenApi() makes MapOpenApi() available to call
+    */
     app.MapOpenApi();
 }
 
@@ -57,7 +69,8 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
-//app.MapControllers();
+// Register attribute-routed controller endpoints into the ASP.NET Core request pipeline.
+app.MapControllers();
 
 
 app.Run();

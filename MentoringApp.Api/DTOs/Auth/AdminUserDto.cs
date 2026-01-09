@@ -14,7 +14,7 @@
         public required IList<string> Roles { get; set; }
 
         // Audit / operational data
-        public DateTime CreatedAt { get; set; }
-        public DateTime? LastLoginAt { get; set; }
+        //public DateTime CreatedAt { get; set; }
+        //public DateTime? LastLoginAt { get; set; }
     }
 }

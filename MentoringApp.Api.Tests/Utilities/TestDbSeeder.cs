@@ -1,6 +1,7 @@
 using MentoringApp.Api.Data;
 using MentoringApp.Api.Identity;
 using MentoringApp.Api.Models;
+using Microsoft.AspNetCore.Identity;
 
 
 namespace MentoringApp.Api.Tests.Utilities;
@@ -8,8 +9,22 @@ namespace MentoringApp.Api.Tests.Utilities;
 
 public static class TestDbSeeder
 {
-    public static void Seed(ApplicationDbContext db)
+    public static async Task SeedAsync(ApplicationDbContext db,
+        UserManager<ApplicationUser> userManager,
+        RoleManager<IdentityRole> roleManager)
     {
+
+        var roles = new[] { "User", "Admin" };
+
+        foreach (var role in roles)
+        {
+            if (!await roleManager.RoleExistsAsync(role))
+            {
+                await roleManager.CreateAsync(new IdentityRole(role));
+            }
+        }
+
+        // Users (Identity only)
         var users = new List<ApplicationUser>
         {
             new ApplicationUser
@@ -26,6 +41,21 @@ public static class TestDbSeeder
             }
         };
 
+        foreach (var user in users)
+        {
+            if (await userManager.FindByIdAsync(user.Id) == null)
+            {
+                await userManager.CreateAsync(user);
+            }
+        }
+
+        // Assign roles
+        await userManager.AddToRoleAsync(users[0], "User");
+        await userManager.AddToRoleAsync(users[1], "Admin");
+
+        db.ChangeTracker.Clear();
+
+        // Profiles (EF)
         var profiles = new List<Profile>
         {
             new Profile
@@ -52,21 +82,22 @@ public static class TestDbSeeder
         { 
             new Mentorship
             {
-                MentorId = "mentor-1",
-                MenteeId = "mentee-1",
+                MentorId = "user-1",
+                MenteeId = "user-1",
                 Scope = "test scope",
-                Status = "Active"
+                Status = "Active",
+                RowVersion = Guid.NewGuid().ToByteArray()
             },
             new Mentorship
             {
-                MentorId = "mentor-2",
-                MenteeId = "mentee-2",
+                MentorId = "user-2",
+                MenteeId = "user-2",
                 Scope = "test scope",
-                Status = "Pending"
+                Status = "Pending",
+                RowVersion = Guid.NewGuid().ToByteArray()
             }
         };
 
-        db.Users.AddRange(users);
         db.Profiles.AddRange(profiles); 
         db.Mentorships.AddRange(mentorships);
 

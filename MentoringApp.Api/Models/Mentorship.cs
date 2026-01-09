@@ -1,5 +1,6 @@
 using MentoringApp.Api.Identity;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MentoringApp.Api.Models
 {
@@ -21,8 +22,7 @@ namespace MentoringApp.Api.Models
         // Collection of testimonials related to this mentorship
         public ICollection<Testimonial> Testimonials { get; set; } = new List<Testimonial>();
 
-    // Optimistic concurrency
-    [Timestamp]
-    public byte[] RowVersion { get; set; } = default!;
-  }
+        // Optimistic concurrency
+        public byte[] RowVersion { get; set; } = default!;
+    }
 }

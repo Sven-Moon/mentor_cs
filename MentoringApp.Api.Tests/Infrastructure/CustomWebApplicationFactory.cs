@@ -1,60 +1,52 @@
-﻿using Microsoft.AspNetCore.Authentication;
+﻿using MentoringApp.Api.Data;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using MentoringApp.Api.Data;
+using Microsoft.Data.Sqlite;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 
 namespace MentoringApp.Api.Tests.Infrastructure;
 
-
 public class CustomWebApplicationFactory
-: WebApplicationFactory<Program>
+    : WebApplicationFactory<Program>
 {
+    private SqliteConnection _connection = default!;
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
+        builder.UseEnvironment("Testing");
+
         builder.ConfigureServices(services =>
         {
-            // Remove real DbContext
-            var dbDescriptor = services.SingleOrDefault(
-            d => d.ServiceType == typeof(DbContextOptions<ApplicationDbContext>));
+            // ❌ Never call BuildServiceProvider() inside ConfigureServices()
+            // ✅ Let ASP.NET Core build the container
+            // ✅ Touch the database only from tests or startup filters
+            services.RemoveAll<DbContextOptions<ApplicationDbContext>>();
+            services.RemoveAll<ApplicationDbContext>();
 
+            _connection = new SqliteConnection("DataSource=:memory:");
+            _connection.Open();
 
-            if (dbDescriptor != null)
-            {
-                services.Remove(dbDescriptor);
-            }
-
-
-            // Optional: if NpgsqlDataSource or other Npgsql services were added, remove them too
-            //var npgsqlDataSource = services.FirstOrDefault(d => d.ServiceType.FullName == "Npgsql.NpgsqlDataSource");
-            //if (npgsqlDataSource != null)
-            //    services.Remove(npgsqlDataSource);
-
-
-
-            // Replace with SQLite in-memory
             services.AddDbContext<ApplicationDbContext>(options =>
             {
-                options.UseSqlite("DataSource=:memory:");
+                options.UseSqlite(_connection);
             });
 
-
-            // Replace authentication
-            services.AddAuthentication("Test")
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = "Test";
+                options.DefaultChallengeScheme = "Test";
+            })
             .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(
-            "Test", options => { });
+                "Test", options => { });
 
-
-            var sp = services.BuildServiceProvider();
-
-
-            using var scope = sp.CreateScope();
-            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-            db.Database.OpenConnection();
-            db.Database.EnsureCreated();
+            services.AddAuthorization();
         });
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        base.Dispose(disposing);
+        _connection?.Dispose();
     }
 }

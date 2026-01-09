@@ -1,5 +1,6 @@
 
 using MentoringApp.Api.Data;
+using MentoringApp.Api.DTOs.Auth;
 using MentoringApp.Api.DTOs.Mentorship;
 using MentoringApp.Api.Identity;
 using MentoringApp.Api.Models;
@@ -36,17 +37,26 @@ public class AdminController : ControllerBase
             .AsNoTracking()
             .ToListAsync();
 
-        return Ok(users.Select(u => new
+        var result = new List<AdminUserDto>();
+
+        foreach (var user in users)
         {
-            u.Id,
-            u.Email,
-            u.UserName,
-            Profile = u.Profile == null ? null : new
+            var roles = await _userManager.GetRolesAsync(user);
+
+            result.Add(new AdminUserDto
             {
-                u.Profile.FirstName,
-                u.Profile.LastName
-            }
-        }));
+                Id = user.Id,
+                Email = user.Email,
+                EmailConfirmed = user.EmailConfirmed,
+                LockoutEnabled = user.LockoutEnabled,
+                Roles = roles,
+                LockoutEnd = user.LockoutEnd,
+                //CreatedAt = user.CreatedAt,
+                //LastLoginAt = user.LastLoginAt
+            });
+        }
+
+        return Ok(result);
     }
 
     [HttpDelete("users/{userId}")]
@@ -86,7 +96,7 @@ public class AdminController : ControllerBase
     }
 
     [HttpPatch("mentorships/{id}")]
-    public async Task<IActionResult> UpdateMentorshipStatus(int id, [FromBody] UpdatementorshipDto dto)
+    public async Task<IActionResult> UpdateMentorshipStatus(int id, [FromBody] UpdateMentorshipDto dto)
     {
         var mentorship = await _context.Mentorships
             .FirstOrDefaultAsync(m => m.Id == id);

@@ -14,8 +14,8 @@ namespace MentoringApp.Api.Models
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow; // Timestamp of when the testimonial was created
 
         // Navigation properties
-        public ApplicationUser Recipient { get; set; }
-        public ApplicationUser Author { get; set; }
-        public Mentorship Mentorship { get; set; }
+        public ApplicationUser Recipient { get; set; } = default!;
+        public ApplicationUser Author { get; set; } = default!;
+        public Mentorship Mentorship { get; set; } = default!;
     }
 }

@@ -19,14 +19,12 @@ namespace MentoringApp.Api.Data
         {
             base.OnModelCreating(modelBuilder); // required for IdentityDbContext
 
-            modelBuilder.Entity<Mentorship>()
-                .Property(m => m.RowVersion)
-                .IsRowVersion();
+            HandleRowVersion(modelBuilder);
 
-      // -------------------------------------
-      // PROFILE (1:1 ApplicationUser → Profile)
-      // -------------------------------------
-      modelBuilder.Entity<Profile>(entity =>
+            // -------------------------------------
+            // PROFILE (1:1 ApplicationUser → Profile)
+            // -------------------------------------
+            modelBuilder.Entity<Profile>(entity =>
             {
                 entity.HasKey(p => p.Id);
 
@@ -107,5 +105,27 @@ namespace MentoringApp.Api.Data
                 .OnDelete(DeleteBehavior.Cascade);
             });
         }
+
+
+        private void HandleRowVersion(ModelBuilder modelBuilder)
+        {
+            // Prevent 'NOT NULL constraint failed: Mentorships.RowVersion' error in SQLite
+            // Handle RowVersion for concurrency control
+            var mentorship = modelBuilder.Entity<Mentorship>();
+            mentorship.Property(m => m.RowVersion)
+                .IsRowVersion()
+                .IsConcurrencyToken();
+            if (Database.ProviderName == "Microsoft.EntityFrameworkCore.Sqlite")
+            {
+                mentorship.Property(m => m.RowVersion)
+                    .ValueGeneratedNever();
+            }
+            else
+            {
+                mentorship.Property(m => m.RowVersion)
+                    .ValueGeneratedOnAddOrUpdate();
+            }
+        }
     }
 }
+

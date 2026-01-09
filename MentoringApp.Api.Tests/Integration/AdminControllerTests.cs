@@ -1,7 +1,10 @@
 using MentoringApp.Api.Data;
 using MentoringApp.Api.DTOs.Auth;
+using MentoringApp.Api.Identity;
 using MentoringApp.Api.Tests.Infrastructure;
 using MentoringApp.Api.Tests.Utilities;
+using Microsoft.AspNetCore.Identity;
+using System.Net.Http.Headers;
 
 
 namespace MentoringApp.Api.Tests.Integration;
@@ -19,12 +22,21 @@ public class AdminControllerTests
         _factory = factory;
         _client = factory.CreateClient();
 
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Test");
 
         using var scope = factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        var userManager = scope.ServiceProvider
+        .GetRequiredService<UserManager<ApplicationUser>>();
+        var roleManager = scope.ServiceProvider
+            .GetRequiredService<RoleManager<IdentityRole>>();
+
+        // Ensure the database is created and seeded
         db.Database.EnsureDeleted();
         db.Database.EnsureCreated();
-        TestDbSeeder.Seed(db);
+        TestDbSeeder.SeedAsync(db, userManager, roleManager)
+            .GetAwaiter()
+            .GetResult();
     }
 
 
@@ -49,7 +61,7 @@ public class AdminControllerTests
 
 
     [Fact]
-    public async Task GetAllUsers_ReturnsUsersWithProfiles()
+    public async Task GetAllUsers_ReturnsAllUsers()
     {
         // Act
         var response = await _client.GetAsync("/api/admin/users");
