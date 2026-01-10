@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Data.Sqlite;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
 
@@ -12,11 +13,17 @@ public class CustomWebApplicationFactory
 {
     private SqliteConnection _connection = default!;
 
-    protected override void ConfigureWebHost(IWebHostBuilder builder)
+  /// <summary>
+  ///  removes any current ApplicationDbContext registration
+  ///  adds a new ApplicationDbContext using an in-memory Sqlite database
+  ///  with authentication scheme for testing
+  /// </summary>
+  /// <param name="builder"></param>
+  protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment("Testing");
 
-        builder.ConfigureServices(services =>
+    builder.ConfigureServices(services =>
         {
             // ❌ Never call BuildServiceProvider() inside ConfigureServices()
             // ✅ Let ASP.NET Core build the container
@@ -42,7 +49,9 @@ public class CustomWebApplicationFactory
 
             services.AddAuthorization();
         });
-    }
+
+
+  }
 
     protected override void Dispose(bool disposing)
     {
