@@ -11,6 +11,8 @@ namespace MentoringApp.Api.Tests.Infrastructure;
 public class TestAuthHandler
 : AuthenticationHandler<AuthenticationSchemeOptions>
 {
+    public const string TestUserId = "test-user-id";
+
     public TestAuthHandler(
     IOptionsMonitor<AuthenticationSchemeOptions> options,
     ILoggerFactory logger,
@@ -22,7 +24,7 @@ public class TestAuthHandler
     {
         var claims = new[]
         {
-            new Claim(ClaimTypes.NameIdentifier, "test-user-id"),
+            new Claim(ClaimTypes.NameIdentifier, TestUserId),
             new Claim(ClaimTypes.Role, "Admin")
         };
 
