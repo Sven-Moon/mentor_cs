@@ -6,6 +6,7 @@
 	<Nullable>enable</Nullable>
     <LangVersion>13.0</LangVersion>
 	<UseAspNetCoreSdk>true</UseAspNetCoreSdk>
+    <UserSecretsId>b1a7c5db-be33-4196-8575-e52c4bce67c1</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
