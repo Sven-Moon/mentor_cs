@@ -1,5 +1,3 @@
-
-
 using MentoringApp.Api.DTOs;
 using MentoringApp.Api.Identity;
 using Microsoft.AspNetCore.Identity;
@@ -76,21 +74,23 @@ namespace MentoringApp.Api.Controllers
 
         private string GenerateJwtToken(ApplicationUser user)
         {
+            // Ensure configuration values are present to avoid passing null to Encoding.GetBytes
+            var keyValue = _config["Jwt:Key"] ?? throw new InvalidOperationException("Configuration value 'Jwt:Key' is not set.");
+            var issuer = _config["Jwt:Issuer"] ?? throw new InvalidOperationException("Configuration value 'Jwt:Issuer' is not set.");
+            var audience = _config["Jwt:Audience"] ?? throw new InvalidOperationException("Configuration value 'Jwt:Audience' is not set.");
+
             var claims = new List<Claim>
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id),
-                new Claim(JwtRegisteredClaimNames.Email, user.Email ?? "")
+                new Claim(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty)
             };
 
-            var key = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(_config["Jwt:Key"])
-            );
-
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(keyValue));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var token = new JwtSecurityToken(
-                issuer: _config["Jwt:Issuer"],
-                audience: _config["Jwt:Audience"],
+                issuer: issuer,
+                audience: audience,
                 claims: claims,
                 expires: DateTime.UtcNow.AddDays(7),
                 signingCredentials: creds

@@ -1,4 +1,3 @@
-
 using MentoringApp.Api.Data;
 using MentoringApp.Api.DTOs.Auth;
 using MentoringApp.Api.DTOs.Mentorship;
@@ -46,7 +45,7 @@ public class AdminController : ControllerBase
             result.Add(new AdminUserDto
             {
                 Id = user.Id,
-                Email = user.Email,
+                Email = user.Email ?? string.Empty,
                 EmailConfirmed = user.EmailConfirmed,
                 LockoutEnabled = user.LockoutEnabled,
                 Roles = roles,
