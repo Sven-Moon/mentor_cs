@@ -7,6 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+Console.WriteLine(builder.Configuration.GetConnectionString("DefaultConnection"));
 
 // OpenAPI / Swagger
 builder.Services.AddOpenApi();
