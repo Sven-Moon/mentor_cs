@@ -21,9 +21,21 @@ public class CustomWebApplicationFactory
   /// <param name="builder"></param>
   protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
+        // Configure for Jwt-based authentication
+        // (see Login_WithValidCredentials_ReturnsJwtToken & Login_ReturnsJwt_WithExpectedClaims)
+        builder.ConfigureAppConfiguration((context, config) =>
+        {
+            config.AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["Jwt:Key"] = "THIS_IS_A_TEST_KEY_FOR_JWT_TOKEN_GENER",
+                ["Jwt:Issuer"] = "MentoringApp.Test",
+                ["Jwt:Audience"] = "MentoringApp.TestAudience"
+            });
+        });
+
         builder.UseEnvironment("Testing");
 
-    builder.ConfigureServices(services =>
+        builder.ConfigureServices(services =>
         {
             // ❌ Never call BuildServiceProvider() inside ConfigureServices()
             // ✅ Let ASP.NET Core build the container
