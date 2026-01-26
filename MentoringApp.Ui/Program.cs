@@ -10,14 +10,6 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 options.UseNpgsql(
     builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Identity
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
-{
-    options.SignIn.RequireConfirmedAccount = false;
-})
-    .AddEntityFrameworkStores<ApplicationDbContext>()
-    .AddDefaultTokenProviders();
-
 // Add services to the container: Razor Pages + Identity UI
 builder.Services.AddRazorPages()
     .AddRazorPagesOptions(options =>

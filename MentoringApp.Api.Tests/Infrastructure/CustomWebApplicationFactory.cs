@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -49,6 +50,8 @@ public class CustomWebApplicationFactory
             services.AddDbContext<ApplicationDbContext>(options =>
             {
                 options.UseSqlite(_connection);
+                options.ConfigureWarnings(w =>
+                    w.Ignore(RelationalEventId.PendingModelChangesWarning));
             });
 
             services.AddAuthentication(options =>

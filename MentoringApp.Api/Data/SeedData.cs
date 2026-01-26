@@ -15,9 +15,15 @@ namespace MentoringApp.Api.Data
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
             var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
-            await context.Database.MigrateAsync();
+            if (context.Database.IsNpgsql())
+            {
+                await context.Database.MigrateAsync();
+            } else
+            {
+                context.Database.EnsureCreated();
+            }
 
-            await SeedRoles(roleManager);
+                await SeedRoles(roleManager);
             var adminUser = await SeedAdminUser(userManager);
             var regularUser = await SeedRegularUser(userManager);
             await SeedSkills(context);

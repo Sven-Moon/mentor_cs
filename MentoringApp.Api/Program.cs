@@ -56,6 +56,11 @@ var app = builder.Build();
 
 app.UseRouting();
 
+// Seed initial data
+using (var scope = app.Services.CreateScope())
+{
+    await SeedData.InitializeAsync(scope.ServiceProvider);
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

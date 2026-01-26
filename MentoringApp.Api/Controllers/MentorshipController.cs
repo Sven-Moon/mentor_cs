@@ -148,12 +148,6 @@ namespace MentoringApp.Api.Controllers
                     .Property("xmin")
                     .OriginalValue = BitConverter.ToUInt32(updated.Version);
             }
-            else
-            {
-                _context.Entry(mentorship)
-                    .Property(m => m.RowVersion)
-                    .OriginalValue = updated.Version;
-            }
 
             // TODO: Add automatic retry / merge strategies
 

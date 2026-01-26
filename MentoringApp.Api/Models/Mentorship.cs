@@ -21,8 +21,5 @@ namespace MentoringApp.Api.Models
 
         // Collection of testimonials related to this mentorship
         public ICollection<Testimonial> Testimonials { get; set; } = new List<Testimonial>();
-
-        // Optimistic concurrency
-        public byte[] RowVersion { get; set; } = default!;
     }
 }

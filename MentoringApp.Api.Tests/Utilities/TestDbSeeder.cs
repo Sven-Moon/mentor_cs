@@ -86,7 +86,6 @@ public static class TestDbSeeder
                 MenteeId = "user-1",
                 Scope = "test scope",
                 Status = "Active",
-                RowVersion = Guid.NewGuid().ToByteArray()
             },
             new Mentorship
             {
@@ -94,7 +93,6 @@ public static class TestDbSeeder
                 MenteeId = "user-2",
                 Scope = "test scope",
                 Status = "Pending",
-                RowVersion = Guid.NewGuid().ToByteArray()
             }
         };
 

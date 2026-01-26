@@ -32,14 +32,12 @@ public class MentorshipsControllerTests
                 MenteeId = mentee1.Id, 
                 Scope = "Scope1", 
                 Status = "Active",
-                RowVersion = Guid.NewGuid().ToByteArray()
             },
             new Mentorship { 
                 MentorId = mentor2.Id, 
                 MenteeId = mentee2.Id, 
                 Scope = "Scope2", 
                 Status = "Inactive",
-                RowVersion = Guid.NewGuid().ToByteArray()
             }
             );
 
