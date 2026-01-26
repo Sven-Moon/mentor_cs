@@ -115,7 +115,7 @@ namespace MentoringApp.Api.Data
             mentorship.Property(m => m.RowVersion)
                 .IsRowVersion()
                 .IsConcurrencyToken();
-            if (Database.ProviderName == "Microsoft.EntityFrameworkCore.Sqlite")
+            if (Database.IsSqlite())
             {
                 mentorship.Property(m => m.RowVersion)
                     .ValueGeneratedNever();

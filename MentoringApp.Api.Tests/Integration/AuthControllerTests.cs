@@ -1,13 +1,7 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
-using System.Net;
-using System.Net.Http.Json;
-using System.Security.Claims;
-using MentoringApp.Api.DTOs;
-using MentoringApp.Api.Identity;
+using MentoringApp.Api.DTOs.Auth;
 using MentoringApp.Api.Data;
 using MentoringApp.Api.Tests.Infrastructure;
-using Microsoft.Extensions.DependencyInjection;
-using Xunit;
 
 namespace MentoringApp.Api.Tests.Integration;
 

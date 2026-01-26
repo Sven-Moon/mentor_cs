@@ -7,7 +7,6 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
-Console.WriteLine(builder.Configuration.GetConnectionString("DefaultConnection"));
 
 // OpenAPI / Swagger
 builder.Services.AddOpenApi();
@@ -16,9 +15,14 @@ builder.Services.AddOpenApi();
 builder.Services.AddControllers();
 
 // DbContext
-if (!builder.Environment.IsEnvironment("Testing"))
+if (builder.Environment.IsEnvironment("Testing"))
 {
     builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        options.UseSqlite("DataSource=:memory:"));
+}
+else
+{
+    builder.Services.AddDbContext< ApplicationDbContext>(options =>
         options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 }
 

@@ -1,4 +1,4 @@
-using MentoringApp.Api.DTOs;
+using MentoringApp.Api.DTOs.Auth;
 using MentoringApp.Api.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -29,7 +29,7 @@ namespace MentoringApp.Api.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register(LoginRequestDto dto)
+        public async Task<IActionResult> Register(RegisterRequestDto dto)
         {
             var existing = await _userManager.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
             if (existing != null)

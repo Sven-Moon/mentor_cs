@@ -1,4 +1,5 @@
-using MentoringApp.Api.Data;
+﻿using MentoringApp.Api.Data;
+using MentoringApp.Api.DTOs.Mentorship;
 using MentoringApp.Api.Identity;
 using MentoringApp.Api.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -36,7 +37,7 @@ namespace MentoringApp.Api.Controllers
         /// Admins get all.
         /// </summary>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Mentorship>>> GetMentorships()
+        public async Task<ActionResult<IEnumerable<MentorshipDto>>> GetMentorships()
         {
             IQueryable<Mentorship> query = _context.Mentorships
                 .Include(m => m.Mentor)
@@ -55,8 +56,8 @@ namespace MentoringApp.Api.Controllers
         /// <summary>
         /// Get a single mentorship by ID.
         /// </summary>
-        [HttpGet("{id:int}")] // why the "int"???
-        public async Task<ActionResult<Mentorship>> GetMentorship(int id) // why not IActionResult??
+        [HttpGet("{id:int}")] 
+        public async Task<ActionResult<MentorshipDto>> GetMentorship(int id) // why not IActionResult??
         {
             var mentorship = await _context.Mentorships
                 .Include(m => m.Mentor)
@@ -82,16 +83,31 @@ namespace MentoringApp.Api.Controllers
         /// </summary>
         [HttpPost]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<Mentorship>> CreateMentorship(
-            [FromBody] Mentorship mentorship)
+        public async Task<ActionResult<MentorshipDto>> CreateMentorship(
+            [FromBody] MentorshipDto dto)
         {
-            _context.Mentorships.Add(mentorship);
+            var entity = new Mentorship
+            {
+                MentorId = dto.MentorId,
+                MenteeId = dto.MenteeId,
+                Scope = dto.Scope,
+                Status = dto.Status,
+                StartDate = dto.StartDate,
+                EndDate = dto.EndDate
+                // ❌ Do NOT set navigation properties
+                // ❌ Do NOT set RowVersion
+            };
+
+
+            _context.Mentorships.Add(entity);
             await _context.SaveChangesAsync();
+
+            dto.Id = entity.Id;
 
             return CreatedAtAction(
                 nameof(GetMentorship), // action name
-                new { id = mentorship.Id }, // routeValues
-                mentorship); // route
+                new { id = entity.Id }, // routeValues
+                dto); // route
         }
 
         /// <summary>
@@ -101,7 +117,7 @@ namespace MentoringApp.Api.Controllers
         [HttpPut("{id:int}")]
         public async Task<IActionResult> UpdateMentorship(
             int id,
-            [FromBody] Mentorship updated)
+            [FromBody] MentorshipDto updated)
         {
             if (id != updated.Id)
                 return BadRequest();
@@ -126,8 +142,18 @@ namespace MentoringApp.Api.Controllers
             mentorship.Status = updated.Status;
 
             // row version
-            _context.Entry(mentorship).Property("RowVersion").OriginalValue = 
-                updated.RowVersion;
+            if (_context.Database.IsNpgsql())
+            {
+                _context.Entry(mentorship)
+                    .Property("xmin")
+                    .OriginalValue = BitConverter.ToUInt32(updated.Version);
+            }
+            else
+            {
+                _context.Entry(mentorship)
+                    .Property(m => m.RowVersion)
+                    .OriginalValue = updated.Version;
+            }
 
             // TODO: Add automatic retry / merge strategies
 

@@ -1,6 +1,6 @@
-namespace MentoringApp.Api.DTOs.Profiles
+namespace MentoringApp.Api.DTOs.Auth
 { 
-    public class LoginRequestDto
+    public class RegisterRequestDto
     {
         public required string Email { get; set; }
         public required string Password { get; set; }

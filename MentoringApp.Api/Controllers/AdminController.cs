@@ -1,4 +1,5 @@
 using MentoringApp.Api.Data;
+using MentoringApp.Api.DTOs;
 using MentoringApp.Api.DTOs.Auth;
 using MentoringApp.Api.DTOs.Mentorship;
 using MentoringApp.Api.Identity;
@@ -139,7 +140,7 @@ public class AdminController : ControllerBase
     }
 
     [HttpPut("skills/{id}")]
-    public async Task<IActionResult> UpdateSkill(int id, [FromBody] Skill updatedSkill)
+    public async Task<IActionResult> UpdateSkill(int id, [FromBody] SkillDto updatedSkill)
     {
         var skill = await _context.Skills.FindAsync(id);
         if (skill == null) 
