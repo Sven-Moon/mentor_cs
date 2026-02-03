@@ -7,4 +7,7 @@
   <button type="submit">Login</button>
 </form>
 
-<p>@Model.Error</p>
+@if (!string.IsNullOrEmpty(Model.Error))
+{
+  <p style="color:red">@Model.Error</p>
+}

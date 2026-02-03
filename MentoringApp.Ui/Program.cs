@@ -1,9 +1,13 @@
 using MentoringApp.Api.Data;
-using MentoringApp.Api.Identity;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddHttpClient("Api", client =>
+{
+    // API's https port: 7263
+    client.BaseAddress = new Uri("https://localhost:7263");
+});
 
 // DB
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
