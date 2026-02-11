@@ -48,6 +48,8 @@ namespace MentoringApp.Api.Controllers
                 return BadRequest(result.Errors);
             }
 
+            // await _userManager.AddToRoleAsync(user, "User");
+
             return Ok(new { message = "Registration successful." });
         }
 

@@ -8,9 +8,9 @@ namespace MentoringApp.Api.Models
         public required string UserId { set; get; }         // Identity user FK
         public required string FirstName { set; get; }
         public required string LastName { set; get; }
-        public required string Bio { set; get; }
-        public required string Location { set; get; }
-        public required DateTime CreatedAt { set; get; }
+        public string Bio { set; get; } = default!;
+        public string Location { set; get; } = default!;
+        public required DateTime CreatedAt { set; get; } = DateTime.UtcNow;
 
         public ApplicationUser User { get; set; } = default!; // Navigation property to ApplicationUser
     }

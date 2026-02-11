@@ -29,7 +29,7 @@ namespace MentoringApp.Api.Data
                 entity.HasOne(p => p.User)
                 .WithOne(u => u.Profile)
                 .HasForeignKey<Profile>(p => p.UserId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Restrict); // disable only
             });
 
             // -------------------------------------
