@@ -1,12 +1,22 @@
 using MentoringApp.Api.Data;
+using MentoringApp.Ui.Services;
 using Microsoft.EntityFrameworkCore;
+using System.Net;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddHttpClient("Api", client =>
+builder.Services.AddHttpClient<ApiClient>("Api", client =>
 {
     // API's https port: 7263
     client.BaseAddress = new Uri("https://localhost:7263");
+})
+.ConfigurePrimaryHttpMessageHandler(() =>
+{
+    return new HttpClientHandler
+    {
+        UseCookies = true,
+        CookieContainer = new CookieContainer(),
+    };
 });
 
 // DB
