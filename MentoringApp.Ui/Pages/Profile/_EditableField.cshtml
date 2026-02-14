@@ -1,0 +1,28 @@
+﻿@model (string FieldName, string Label, string Value)
+@{
+  var isEditing = Context.Request.Form["EditingField"] == Model.FieldName;
+}
+
+<div class="profile-row">
+  <strong>@Model.Label:</strong>
+
+  @if (isEditing)
+  {
+    <form method="post" asp-page-handler="Update" class="inline-form">
+      <input type="hidden" name="FieldName" value="@Model.FieldName" />
+      <input type="text" name="EditValue" value="@Model.Value" class="form-control" />
+
+      <button type="submit" class="btn btn-success">✔</button>
+      <button type="button" onclick="cancelEdit()" class="btn btn-danger">✖</button>
+    </form>
+  }
+  else
+  {
+    <span>@Model.Value</span>
+
+    <form method="post" asp-page-handler="Edit" style="display:inline;">
+      <input type="hidden" name="field" value="@Model.FieldName" />
+      <button type="submit" class="btn btn-link">Edit</button>
+    </form>
+  }
+</div>

@@ -29,3 +29,22 @@ body {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
   text-align: start;
 }
+
+
+.profile-container {
+    max-width: 600px;
+}
+
+.profile-row {
+    margin-bottom: 15px;
+}
+
+.inline-form {
+    display: inline-flex;
+    gap: 5px;
+    align-items: center;
+}
+
+.form-control {
+    width: 250px;
+}

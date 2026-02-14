@@ -1,5 +1,28 @@
 ﻿@page
-@model IndexModel
-<h1>Profile</h1>
-@{
+@model MentoringApp.Ui.Pages.Profile.IndexModel
+
+<h2>My Profile</h2>
+
+<div class="profile-container">
+
+  @await Html.PartialAsync("_EditableField",
+  (nameof(Model.Profile.FirstName), "First Name", Model.Profile.FirstName))
+
+  @await Html.PartialAsync("_EditableField",
+    (nameof(Model.Profile.LastName), "Last Name", Model.Profile.LastName))
+
+  @await Html.PartialAsync("_EditableField",
+    (nameof(Model.Profile.Bio), "Bio", Model.Profile.Bio))
+
+  @await Html.PartialAsync("_EditableField",
+    (nameof(Model.Profile.Location), "Location", Model.Profile.Location))
+
+</div>
+
+@section Scripts {
+  <script>
+    function cancelEdit() {
+        window.location.reload();
+    }
+  </script>
 }
