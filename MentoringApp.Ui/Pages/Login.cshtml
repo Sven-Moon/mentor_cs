@@ -1,13 +1,42 @@
 ﻿@page
 @model LoginModel
 
-<form method="post">
-  <input asp-for="Email" placeholder="Email" />
-  <input asp-for="Password" type="password" placeholder="Password" />
-  <button type="submit">Login</button>
-</form>
+<div id="auth-container">
+  <button id="toggleButton" type="button">Switch to Register</button>
 
-@if (!string.IsNullOrEmpty(Model.Error))
-{
-  <p style="color:red">@Model.Error</p>
-}
+  <form id="loginForm" method="post">
+    <input asp-for="Email" placeholder="Email" />
+    <input asp-for="Password" type="password" placeholder="Password" />
+    <input type="hidden" name="FormType" value="login" />
+    <button type="submit">Login</button>
+  </form>
+
+  <form id="registerForm" method="post" style="display:none">
+    <input name="RegisterEmail" placeholder="Email" />
+    <input name="RegisterPassword" type="password" placeholder="Password" />
+    <input name="ConfirmPassword" type="password" placeholder="Confirm password" />
+    <input type="hidden" name="FormType" value="register" />
+    <button type="submit">Register</button>
+  </form>
+
+  @if (!string.IsNullOrEmpty(Model.Error))
+  {
+    <p style="color:red">@Model.Error</p>
+  }
+</div>
+
+<script>
+  (function() {
+    var toggle = document.getElementById('toggleButton');
+    var loginForm = document.getElementById('loginForm');
+    var registerForm = document.getElementById('registerForm');
+    var showingLogin = true;
+
+    toggle.addEventListener('click', function () {
+      showingLogin = !showingLogin;
+      loginForm.style.display = showingLogin ? '' : 'none';
+      registerForm.style.display = showingLogin ? 'none' : '';
+      toggle.textContent = showingLogin ? 'Switch to Register' : 'Switch to Login';
+    });
+  })();
+</script>
