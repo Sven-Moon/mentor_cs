@@ -53,11 +53,11 @@ public class ProfileControllerTests
     // ---------- POST /api/profile ----------
 
     [Fact]
-    public async Task CreateProfile_WhenProfileDoesNotExist_ReturnsCreated()
+    public async Task EditProfile_WhenProfileDoesNotExist_ReturnsCreated()
     {
         SeedTestUser();
 
-        var dto = new CreateProfileDto
+        var dto = new EditProfileDto
         {
             FirstName = "John",
             LastName = "Doe",
@@ -75,11 +75,11 @@ public class ProfileControllerTests
     }
 
     [Fact]
-    public async Task CreateProfile_WhenProfileExists_ReturnsConflict()
+    public async Task EditProfile_WhenProfileExists_ReturnsConflict()
     {
         SeedProfile();
 
-        var dto = new CreateProfileDto
+        var dto = new EditProfileDto
         {
             FirstName = "Jane",
             LastName = "Doe",

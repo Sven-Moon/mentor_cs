@@ -1,0 +1,24 @@
+﻿@page
+@model EditProfileModel
+@{
+}
+<h2>Create Your Profile</h2>
+
+<form method="post">
+  <input asp-for="FirstName" placeholder="First name" />
+  <span asp-validation-for="FirstName"></span>
+
+  <input asp-for="LastName" placeholder="Last name" />
+  <span asp-validation-for="LastName"></span>
+
+  <textarea asp-for="Bio" placeholder="Tell us about yourself"></textarea>
+
+  <input asp-for="Location" placeholder="Location" />
+
+  <button type="submit">Save Profile</button>
+</form>
+
+@if (!string.IsNullOrEmpty(Model.Error))
+{
+  <p style="color:red">@Model.Error</p>
+}

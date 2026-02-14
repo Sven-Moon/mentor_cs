@@ -38,7 +38,7 @@ namespace MentoringApp.Ui.Services
             return await GetJsonAsync<ProfileDto>("/api/profile/me");
         }
 
-        public async Task CreateProfileAsync(CreateProfileDto dto)
+        public async Task EditProfileAsync(EditProfileDto dto)
         {
             await PostJsonAsync("/api/profile", dto);
         }

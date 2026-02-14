@@ -52,7 +52,7 @@ namespace MentoringApp.Api.Controllers
 
         // POST: api/profile
         [HttpPost]
-        public async Task<ActionResult<ProfileDto>> CreateProfile(CreateProfileDto dto)
+        public async Task<ActionResult<ProfileDto>> EditProfile(EditProfileDto dto)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
