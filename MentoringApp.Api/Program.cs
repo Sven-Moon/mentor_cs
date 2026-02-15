@@ -8,6 +8,17 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.WithOrigins("https://localhost:3000") // update to your React origin
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
+
 // OpenAPI / Swagger
 builder.Services.AddOpenApi();
 
@@ -75,9 +86,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseCors();
 
 // Register attribute-routed controller endpoints into the ASP.NET Core request pipeline.
 app.MapControllers();
