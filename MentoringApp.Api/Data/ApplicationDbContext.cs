@@ -14,6 +14,7 @@ namespace MentoringApp.Api.Data
         public DbSet<UserSkill> UserSkills { get; set; }
         public DbSet<Mentorship> Mentorships { get; set; }
         public DbSet<Testimonial> Testimonials { get; set; }
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -110,6 +111,14 @@ namespace MentoringApp.Api.Data
                 .WithMany(m => m.Testimonials)
                 .HasForeignKey(t => t.MentorshipId)
                 .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // RefreshToken basic mapping (optional)
+            modelBuilder.Entity<RefreshToken>(entity =>
+            {
+                entity.HasKey(rt => rt.Id);
+                entity.Property(rt => rt.Token).IsRequired();
+                entity.Property(rt => rt.UserId).IsRequired();
             });
         }
     }
