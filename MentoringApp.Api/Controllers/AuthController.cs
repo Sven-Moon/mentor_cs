@@ -1,15 +1,20 @@
 using MentoringApp.Api.Data;
 using MentoringApp.Api.DTOs.Auth;
+using MentoringApp.Api.DTOs.Common;
 using MentoringApp.Api.Identity;
 using MentoringApp.Api.Models;
+using MentoringApp.Api.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace MentoringApp.Api.Controllers
 {
@@ -21,17 +26,20 @@ namespace MentoringApp.Api.Controllers
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IConfiguration _config;
         private readonly ApplicationDbContext _db;
+        private readonly IProfileService _profileService;
 
         public AuthController(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
             IConfiguration config,
-            ApplicationDbContext db)
+            ApplicationDbContext db,
+            IProfileService profileService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _config = config;
             _db = db;
+            _profileService = profileService;
         }
 
         [HttpPost("register")]
@@ -52,6 +60,36 @@ namespace MentoringApp.Api.Controllers
             if (!result.Succeeded)
             {
                 return BadRequest(result.Errors);
+            }
+
+            // Create default empty Profile using DbContext directly and ensure required DB columns are set.
+            try
+            {
+                // Ensure user.Id is present (some stores may not populate it on the initial object).
+                if (string.IsNullOrEmpty(user.Id))
+                {
+                    var reloaded = await _userManager.FindByEmailAsync(user.Email);
+                    if (reloaded != null)
+                    {
+                        user = reloaded;
+                    }
+                }
+
+                // Create and persist a Profile with explicit defaults for DB NOT NULL columns.
+                var profile = new Profile
+                {
+                    UserId = user.Id,
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                _db.Profiles.Add(profile);
+                await _db.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                // If profile creation fails, delete the user to avoid orphaned accounts.
+                await _userManager.DeleteAsync(user);
+                return BadRequest(new { message = "Failed to create user profile.", error = ex.Message });
             }
 
             // await _userManager.AddToRoleAsync(user, "User");

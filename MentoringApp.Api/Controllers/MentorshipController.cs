@@ -15,14 +15,14 @@ namespace MentoringApp.Api.Controllers
     [Authorize]
     public class MentorshipsController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly ApplicationDbContext _db;
         private readonly UserManager<ApplicationUser> _userManager;
 
         public MentorshipsController(
             ApplicationDbContext context, 
             UserManager<ApplicationUser> userManager)
         {
-            _context = context;
+            _db = context;
             _userManager = userManager;
         }
 
@@ -39,7 +39,7 @@ namespace MentoringApp.Api.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<MentorshipDto>>> GetMentorships()
         {
-            IQueryable<Mentorship> query = _context.Mentorships
+            IQueryable<Mentorship> query = _db.Mentorships
                 .Include(m => m.Mentor)
                 .Include(m => m.Mentee);
 
@@ -59,7 +59,7 @@ namespace MentoringApp.Api.Controllers
         [HttpGet("{id:int}")] 
         public async Task<ActionResult<MentorshipDto>> GetMentorship(int id) // why not IActionResult??
         {
-            var mentorship = await _context.Mentorships
+            var mentorship = await _db.Mentorships
                 .Include(m => m.Mentor)
                 .Include(m => m.Mentee)
                 .FirstOrDefaultAsync(m => m.Id == id);
@@ -99,8 +99,8 @@ namespace MentoringApp.Api.Controllers
             };
 
 
-            _context.Mentorships.Add(entity);
-            await _context.SaveChangesAsync();
+            _db.Mentorships.Add(entity);
+            await _db.SaveChangesAsync();
 
             dto.Id = entity.Id;
 
@@ -122,7 +122,7 @@ namespace MentoringApp.Api.Controllers
             if (id != updated.Id)
                 return BadRequest();
 
-            var mentorship = await _context.Mentorships
+            var mentorship = await _db.Mentorships
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (mentorship == null)
@@ -142,9 +142,9 @@ namespace MentoringApp.Api.Controllers
             mentorship.Status = updated.Status;
 
             // row version
-            if (_context.Database.IsNpgsql())
+            if (_db.Database.IsNpgsql())
             {
-                _context.Entry(mentorship)
+                _db.Entry(mentorship)
                     .Property("xmin")
                     .OriginalValue = BitConverter.ToUInt32(updated.Version);
             }
@@ -153,7 +153,7 @@ namespace MentoringApp.Api.Controllers
 
             try
             {
-                await _context.SaveChangesAsync();
+                await _db.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -170,13 +170,13 @@ namespace MentoringApp.Api.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteMentorship(int id)
         {
-            var mentorship = await _context.Mentorships.FindAsync(id);
+            var mentorship = await _db.Mentorships.FindAsync(id);
 
             if (mentorship == null)
                 return NotFound();
 
-            _context.Mentorships.Remove(mentorship);
-            await _context.SaveChangesAsync();
+            _db.Mentorships.Remove(mentorship);
+            await _db.SaveChangesAsync();
 
             return NoContent();
         }

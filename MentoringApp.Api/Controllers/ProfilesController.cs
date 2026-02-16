@@ -1,10 +1,12 @@
 using MentoringApp.Api.Data;
 using MentoringApp.Api.DTOs.Profiles;
+using MentoringApp.Api.Identity;
 using MentoringApp.Api.Models;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using System.Security.Claims;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
+using MentoringApp.Api.DTOs.Common;
 
 namespace MentoringApp.Api.Controllers
 {
@@ -13,11 +15,11 @@ namespace MentoringApp.Api.Controllers
     [Authorize]
     public class ProfileController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly ApplicationDbContext _db;
 
-        public ProfileController(ApplicationDbContext context)
+        public ProfileController(ApplicationDbContext db)
         {
-            _context = context;
+            _db = db;
         }
 
         // GET: api/profile/me
@@ -26,7 +28,7 @@ namespace MentoringApp.Api.Controllers
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            var profile = await _context.Profiles
+            var profile = await _db.Profiles
                 .AsNoTracking()
                 .FirstOrDefaultAsync(p => p.UserId == userId);
 
@@ -40,7 +42,7 @@ namespace MentoringApp.Api.Controllers
         [HttpGet("{id:int}")]
         public async Task<ActionResult<ProfileDto>> GetProfile(int id)
         {
-            var profile = await _context.Profiles
+            var profile = await _db.Profiles
                 .AsNoTracking()
                 .FirstOrDefaultAsync(p => p.Id == id);
 
@@ -52,33 +54,51 @@ namespace MentoringApp.Api.Controllers
 
         // POST: api/profile
         [HttpPost]
-        public async Task<ActionResult<ProfileDto>> EditProfile(EditProfileDto dto)
+        public async Task<ActionResult<ProfileDto>> UpsertProfile(UpsertProfileDto dto)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            var existingProfile = await _context.Profiles
-                .AnyAsync(p => p.UserId == userId);
+            // Load existing profile for the user
+            var profile = await _db.Profiles
+                .FirstOrDefaultAsync(p => p.UserId == userId);
 
-            if (existingProfile)
-                return Conflict("Profile already exists for this user");
-
-            var profile = new Profile
+            if (profile == null)
             {
-                UserId = userId!,
-                FirstName = dto.FirstName,
-                LastName = dto.LastName,
-                Bio = dto.Bio,
-                Location = dto.Location,
-                CreatedAt = DateTime.UtcNow
-            };
+                var newProfile = new Profile
+                {
+                    UserId = userId!,
+                    FirstName = dto.FirstName,
+                    LastName = dto.LastName,
+                    Bio = dto.Bio,
+                    Location = dto.Location,
+                    CreatedAt = DateTime.UtcNow
+                };
 
-            _context.Profiles.Add(profile);
-            await _context.SaveChangesAsync();
+                _db.Profiles.Add(newProfile);
+                await _db.SaveChangesAsync();
 
-            return CreatedAtAction(
-                nameof(GetProfile),
-                new { id = profile.Id },
-                ToDto(profile));
+                return CreatedAtAction(
+                    nameof(GetProfile),
+                    new { id = newProfile.Id },
+                    ToDto(newProfile));
+            }
+
+            // Update existing profile but ignore null values from dto
+            if (dto.FirstName != null)
+                profile.FirstName = dto.FirstName;
+
+            if (dto.LastName != null)
+                profile.LastName = dto.LastName;
+
+            if (dto.Bio != null)
+                profile.Bio = dto.Bio;
+
+            if (dto.Location != null)
+                profile.Location = dto.Location;
+
+            await _db.SaveChangesAsync();
+
+            return Ok(ToDto(profile));
         }
 
         // PUT: api/profile/me
@@ -87,7 +107,7 @@ namespace MentoringApp.Api.Controllers
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            var profile = await _context.Profiles
+            var profile = await _db.Profiles
                 .FirstOrDefaultAsync(p => p.UserId == userId);
 
             if (profile == null)
@@ -98,7 +118,7 @@ namespace MentoringApp.Api.Controllers
             profile.Bio = dto.Bio;
             profile.Location = dto.Location;
 
-            await _context.SaveChangesAsync();
+            await _db.SaveChangesAsync();
 
             return NoContent();
         }
