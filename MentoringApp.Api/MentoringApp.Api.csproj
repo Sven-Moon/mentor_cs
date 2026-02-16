@@ -10,11 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Services\ProfileService.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="Services\ProfileService.cs" />
+    <None Include="Services\Interfaces\IProfileService.cs" />
   </ItemGroup>
 	
   <ItemGroup>

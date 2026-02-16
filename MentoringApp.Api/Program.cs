@@ -1,5 +1,6 @@
 using MentoringApp.Api.Data;
 using MentoringApp.Api.Identity;
+using MentoringApp.Api.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -7,6 +8,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+
+#region Services
 
 builder.Services.AddCors(options =>
 {
@@ -33,7 +36,7 @@ if (builder.Environment.IsEnvironment("Testing"))
 }
 else
 {
-    builder.Services.AddDbContext< ApplicationDbContext>(options =>
+    builder.Services.AddDbContext<ApplicationDbContext>(options =>
         options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 }
 
@@ -62,6 +65,11 @@ builder.Services.AddAuthentication(options =>
         )
     };
 });
+builder.Services.AddScoped<IProfileService, ProfileService>();
+
+#endregion services
+
+#region App
 
 var app = builder.Build();
 
@@ -93,7 +101,8 @@ app.UseCors();
 // Register attribute-routed controller endpoints into the ASP.NET Core request pipeline.
 app.MapControllers();
 
-
 app.Run();
+
+#endregion app
 
 public partial class Program { } // For testing purposes, to allow the use of WebApplicationFactory in tests
