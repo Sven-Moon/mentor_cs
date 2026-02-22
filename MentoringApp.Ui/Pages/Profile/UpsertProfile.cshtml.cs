@@ -6,11 +6,11 @@ using System.Net.Http.Headers;
 
 namespace MentoringApp.Ui.Pages.Profile
 {
-    public class EditProfileModel : PageModel
+    public class UpdateProfileModel : PageModel
     {
         private readonly HttpClient _httpClient;
 
-        public EditProfileModel(IHttpClientFactory httpClientFactory)
+        public UpdateProfileModel(IHttpClientFactory httpClientFactory)
         {
             _httpClient = httpClientFactory.CreateClient("Api");
         }
@@ -41,7 +41,7 @@ namespace MentoringApp.Ui.Pages.Profile
 
             var response = await _httpClient.PostAsJsonAsync(
                 "/api/profile",
-                new EditProfileDto
+                new UpdateProfileDto
                 {
                     FirstName = FirstName,
                     LastName = LastName,

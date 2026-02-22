@@ -9,7 +9,7 @@ namespace MentoringApp.Api.Services
         Task<Profile?> GetByUserIdAsync(string userId);
         Task<Profile> CreateDefaultProfileAsync(ApplicationUser user);
         Task<Profile> CreateAsync(Profile profile);
-        Task UpdateProfile(UpdateProfileDto profile);
+        Task UpdateProfile(string UserId, UpdateProfileDto profile);
         Task DeleteByUserIdAsync(string userId);
     }
 }

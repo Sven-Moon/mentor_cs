@@ -1,6 +1,6 @@
 ﻿namespace MentoringApp.Api.DTOs.Profiles
 {
-    public class UpsertProfileDto
+    public class CreateProfileDto
     {
         public string? FirstName { get; set; }
         public string? LastName { get; set; }

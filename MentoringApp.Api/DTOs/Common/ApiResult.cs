@@ -22,8 +22,6 @@ namespace MentoringApp.Api.DTOs.Common
     {
         public T? Data { get; init; }
 
-        protected ApiResult() { }
-
         public static ApiResult<T> Success(T data) =>
             new() { IsSuccess = true, Data = data };
 

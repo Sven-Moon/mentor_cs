@@ -1,12 +1,11 @@
 using MentoringApp.Api.Data;
 using MentoringApp.Api.DTOs.Profiles;
-using MentoringApp.Api.Identity;
 using MentoringApp.Api.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
-using MentoringApp.Api.DTOs.Common;
+using MentoringApp.Api.Services;
 
 namespace MentoringApp.Api.Controllers
 {
@@ -16,10 +15,12 @@ namespace MentoringApp.Api.Controllers
     public class ProfileController : ControllerBase
     {
         private readonly ApplicationDbContext _db;
+        private readonly ProfileService _profileService;
 
-        public ProfileController(ApplicationDbContext db)
+        public ProfileController(ApplicationDbContext db, ProfileService profileService)
         {
             _db = db;
+            _profileService = profileService;
         }
 
         // GET: api/profile/me
@@ -42,9 +43,7 @@ namespace MentoringApp.Api.Controllers
         [HttpGet("{id:int}")]
         public async Task<ActionResult<ProfileDto>> GetProfile(int id)
         {
-            var profile = await _db.Profiles
-                .AsNoTracking()
-                .FirstOrDefaultAsync(p => p.Id == id);
+            var profile = await _profileService.GetByIdAsync(id);
 
             if (profile == null)
                 return NotFound();
@@ -54,49 +53,35 @@ namespace MentoringApp.Api.Controllers
 
         // POST: api/profile
         [HttpPost]
-        public async Task<ActionResult<ProfileDto>> UpsertProfile(UpsertProfileDto dto)
+        public async Task<ActionResult<ProfileDto>> UpdateProfile(UpdateProfileDto dto)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
+            if (userId == null)
+            {
+                return Unauthorized("User cannot be found");
+            }
+
+            await _profileService.UpdateProfile(userId, dto);
+
             // Load existing profile for the user
-            var profile = await _db.Profiles
+            Profile? profile = await _db.Profiles
                 .FirstOrDefaultAsync(p => p.UserId == userId);
 
             if (profile == null)
             {
-                var newProfile = new Profile
-                {
-                    UserId = userId!,
-                    FirstName = dto.FirstName,
-                    LastName = dto.LastName,
-                    Bio = dto.Bio,
-                    Location = dto.Location,
-                    CreatedAt = DateTime.UtcNow
-                };
-
-                _db.Profiles.Add(newProfile);
-                await _db.SaveChangesAsync();
-
-                return CreatedAtAction(
-                    nameof(GetProfile),
-                    new { id = newProfile.Id },
-                    ToDto(newProfile));
+                return NotFound();
             }
 
-            // Update existing profile but ignore null values from dto
-            if (dto.FirstName != null)
-                profile.FirstName = dto.FirstName;
+            UpdateProfileDto updateDto = new UpdateProfileDto
+            {
+                FirstName = dto.FirstName,
+                LastName = dto.LastName,
+                Bio = dto.Bio,
+                Location = dto.Location
+            };
 
-            if (dto.LastName != null)
-                profile.LastName = dto.LastName;
-
-            if (dto.Bio != null)
-                profile.Bio = dto.Bio;
-
-            if (dto.Location != null)
-                profile.Location = dto.Location;
-
-            await _db.SaveChangesAsync();
+            await _profileService.UpdateProfile(profile.UserId, updateDto);
 
             return Ok(ToDto(profile));
         }

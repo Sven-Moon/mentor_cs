@@ -1,4 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System;
+using System.Net.Http;
+using System.Net.Http.Json;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace MentoringApp.Ui.Pages;
@@ -40,31 +44,77 @@ public class LoginModel : PageModel
     #region Private Methods
     private async Task<IActionResult> HandleLogin()
     {
-        var response = await _httpClient.PostAsJsonAsync(
-            "/api/auth/login",
-            new
+        if (_httpClient.BaseAddress is null)
+        {
+            Error = "API base address is not configured. Verify your HttpClient registration for the named client \"Api\".";
+            return Page();
+        }
+
+        try
+        {
+            HttpResponseMessage response = await _httpClient.PostAsJsonAsync(
+                "/api/auth/login",
+                new
+                {
+                    email = Email,
+                    password = Password
+                });
+
+            if (!response.IsSuccessStatusCode)
             {
-                email = Email,
-                password = Password
-            });
+                // Read server response body for diagnostics (may include stack trace or error details)
+                string serverBody = string.Empty;
+                try
+                {
+                    serverBody = await response.Content.ReadAsStringAsync();
+                }
+                catch
+                {
+                    // Ignore errors reading the body - we still want to surface status code.
+                }
 
-        if (!response.IsSuccessStatusCode)
+                if (response.StatusCode == System.Net.HttpStatusCode.InternalServerError)
+                {
+                    // Provide a helpful message but include server details to troubleshoot.
+                    Error = $"Server error (500). Response: {serverBody}";
+                }
+                else
+                {
+                    Error = $"Login failed ({(int)response.StatusCode}). Response: {serverBody}";
+                }
+
+                return Page();
+            }
+
+            var loginResult = await response.Content.ReadFromJsonAsync<LoginResponse>();
+
+            if (loginResult is null || string.IsNullOrEmpty(loginResult.Token))
+            {
+                Error = "Login failed";
+                return Page();
+            }
+
+            HttpContext.Session.SetString("Jwt", loginResult.Token); // store access token in session
+            return RedirectToPage("/Index");
+        }
+        catch (HttpRequestException ex)
         {
-            Error = "Invalid email or password";
+            // Typical "actively refused" or DNS/failure to connect scenarios surface here.
+            Error = "Unable to reach the authentication server. Please ensure the API is running and the base URL is correct. " + ex.Message;
             return Page();
         }
-
-        var loginResult = await response.Content.ReadFromJsonAsync<LoginResponse>();
-
-        if (loginResult is null || string.IsNullOrEmpty(loginResult.Token))
+        catch (TaskCanceledException ex)
         {
-            Error = "Login failed";
+            // Timeout
+            Error = "The request timed out. " + ex.Message;
             return Page();
         }
-
-
-        TempData["Jwt"] = loginResult.Token; // only works for one redirect
-        return RedirectToPage("/Index");
+        catch (Exception ex)
+        {
+            // Fallback
+            Error = "Unexpected error while attempting to log in. " + ex.Message;
+            return Page();
+        }
     }
 
     private async Task<IActionResult> HandleRegister()
@@ -85,7 +135,14 @@ public class LoginModel : PageModel
 
         if (!response.IsSuccessStatusCode)
         {
-            Error = "Registration failed";
+            string serverBody = string.Empty;
+            try
+            {
+                serverBody = await response.Content.ReadAsStringAsync();
+            }
+            catch { }
+
+            Error = $"Registration failed ({(int)response.StatusCode}). {serverBody}";
             return Page();
         }
 

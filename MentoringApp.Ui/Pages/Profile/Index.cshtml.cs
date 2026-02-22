@@ -1,44 +1,50 @@
-using System.Net.Http.Json;
+using MentoringApp.Ui.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using MentoringApp.Api.DTOs.Profiles;
 
 namespace MentoringApp.Ui.Pages.Profile;
 
 public class IndexModel : PageModel
 {
-    public IndexModel(IHttpClientFactory factory)
+    public IndexModel(ApiClient apiClient)
     {
-        _httpClient = factory.CreateClient("Api");
+        _apiClient = apiClient;
     }
 
     #region Properties
 
-    private readonly HttpClient _httpClient;
+    private readonly ApiClient _apiClient;
 
-    public ProfileDto Profile { get; set; } = new();
+    // Use the API DTO type (from MentoringApp.Api.DTOs.Profiles) to avoid the implicit conversion error.
+    public ProfileDto Profile { get; set; } = new ProfileDto { 
+        FirstName = "", 
+        LastName = "", 
+        Location = "", 
+        UserId = "", 
+        Bio = ""
+    };
 
     [BindProperty]
-    public string? EditValue { get; set; }
+    public string EditValue { get; set; } = string.Empty;
 
     [BindProperty]
-    public string? FieldName { get; set; }
+    public string FieldName { get; set; } = string.Empty;
 
-    public string? EditingField { get; set; }
+    public string EditingField { get; set; } = string.Empty;
 
     #endregion properties
 
     public async Task OnGetAsync()
     {
-        Profile = await _httpClient.GetFromJsonAsync<ProfileDto>("api/profile/me")
-                  ?? new ProfileDto();
+        Profile = await _apiClient.GetMyProfileAsync();
     }
 
     public async Task<IActionResult> OnPostEditAsync(string field)
     {
         EditingField = field;
 
-        Profile = await _httpClient.GetFromJsonAsync<ProfileDto>("api/profile/me")
-                  ?? new ProfileDto();
+        Profile = await _apiClient.GetMyProfileAsync();
 
         EditValue = field switch
         {
@@ -46,7 +52,7 @@ public class IndexModel : PageModel
             nameof(Profile.LastName) => Profile.LastName,
             nameof(Profile.Bio) => Profile.Bio,
             nameof(Profile.Location) => Profile.Location,
-            _ => ""
+            _ => string.Empty
         };
 
         return Page();
@@ -54,38 +60,18 @@ public class IndexModel : PageModel
 
     public async Task<IActionResult> OnPostUpdateAsync()
     {
-        var current = await _httpClient.GetFromJsonAsync<ProfileDto>("api/profile/me");
+        var current = await _apiClient.GetMyProfileAsync();
 
         if (current is null) return RedirectToPage();
-
-        var updated = new EditProfileDto
+        var updated = new UpdateProfileDto
         {
             FirstName = FieldName == nameof(Profile.FirstName) ? EditValue! : current.FirstName,
             LastName = FieldName == nameof(Profile.LastName) ? EditValue! : current.LastName,
             Bio = FieldName == nameof(Profile.Bio) ? EditValue! : current.Bio,
             Location = FieldName == nameof(Profile.Location) ? EditValue! : current.Location
         };
-
-        await _httpClient.PutAsJsonAsync("api/profile", updated);
+        await _apiClient.UpdateProfileAsync(updated);
 
         return RedirectToPage();
     }
 }
-
-#region DTOs
-public class ProfileDto
-{
-    public string FirstName { get; set; } = "";
-    public string LastName { get; set; } = "";
-    public string Bio { get; set; } = "";
-    public string Location { get; set; } = "";
-}
-
-public class EditProfileDto
-{
-    public required string FirstName { get; set; }
-    public required string LastName { get; set; }
-    public string Bio { get; set; } = "";
-    public string Location { get; set; } = "";
-}
-#endregion dtos

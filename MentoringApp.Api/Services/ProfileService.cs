@@ -1,8 +1,8 @@
 ﻿using MentoringApp.Api.Data;
+using MentoringApp.Api.DTOs.Profiles;
 using MentoringApp.Api.Identity;
 using MentoringApp.Api.Models;
 using Microsoft.EntityFrameworkCore;
-using MentoringApp.Api.DTOs.Profiles;
 
 namespace MentoringApp.Api.Services
 {
@@ -42,6 +42,22 @@ namespace MentoringApp.Api.Services
                 .FirstOrDefaultAsync(p => p.UserId == userId);
         }
 
+        public async Task<Profile?> GetByIdAsync(int id)
+        {
+            if (id <= 0)
+                throw new ArgumentException("Profile ID must be a positive integer.", nameof(id));
+            
+            Profile? profile = await _db.Profiles
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            if (profile == null)
+            {
+                throw new ArgumentException("Profile not found for ID: ", id.ToString());
+            }
+
+            return profile;
+        }
+
         public async Task<Profile> CreateAsync(Profile profile)
         {
             if (profile == null)
@@ -54,24 +70,28 @@ namespace MentoringApp.Api.Services
 
         }
 
-        public async Task UpdateProfile(UpdateProfileDto dto)
+        public async Task UpdateProfile(string UserId, UpdateProfileDto dto)
         {
             if (dto == null)
                 throw new ArgumentNullException(nameof(dto), "Updated profile cannot be null.");
 
-            var userId = dto.UserId;
-
-            if (userId == null)
+            if (UserId == null)
                 throw new ArgumentException("Profile must have a valid UserId.", nameof(dto));
 
-            var existingProfile = _db.Profiles.FirstOrDefault(p => p.UserId == userId);
+            var existingProfile = _db.Profiles.FirstOrDefault(p => p.UserId == UserId);
 
             if (existingProfile == null)
             {
-                _db.Profiles.Add(profile);
+                throw new ArgumentException("Profile not found for UserId: ", UserId);
             }
 
-            _db.Profiles.Update(dto);
+            existingProfile.UserId = UserId;
+            existingProfile.FirstName = dto.FirstName;
+            existingProfile.LastName = dto.LastName;
+            existingProfile.Bio = dto.Bio;
+
+            _db.Profiles.Update(existingProfile);
+            
             await _db.SaveChangesAsync();
         }
 

@@ -1,6 +1,10 @@
 ﻿@model (string FieldName, string Label, string Value)
 @{
-  var isEditing = Context.Request.Form["EditingField"] == Model.FieldName;
+  var isEditing = false;
+  if (Context.Request.HasFormContentType)
+  {
+    isEditing = Context.Request.Form["EditingField"] == Model.FieldName;
+  }
 }
 
 <div class="profile-row">
