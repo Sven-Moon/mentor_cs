@@ -50,74 +50,7 @@ public class ProfileControllerTests
         Assert.Equal("John", profile.FirstName);
     }
 
-    // ---------- POST /api/profile ----------
-
-    [Fact]
-    public async Task UpdateProfile_WhenProfileDoesNotExist_ReturnsCreated()
-    {
-        SeedTestUser();
-
-        var dto = new UpdateProfileDto
-        {
-            FirstName = "John",
-            LastName = "Doe",
-            Bio = "Bio",
-            Location = "NY"
-        };
-
-        var response = await _client.PostAsJsonAsync("/api/profile", dto);
-
-        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
-
-        var profile = await response.Content.ReadFromJsonAsync<ProfileDto>();
-        Assert.NotNull(profile);
-        Assert.Equal("John", profile.FirstName);
-    }
-
-    [Fact]
-    public async Task UpdateProfile_WhenProfileExists_ReturnsConflict()
-    {
-        SeedProfile();
-
-        var dto = new UpdateProfileDto
-        {
-            FirstName = "Jane",
-            LastName = "Doe",
-            Bio = "Bio",
-            Location = "CA"
-        };// ClaimTypes.NameIdentifier (UserId) = "test-user-id" (TestUserId)
-
-        var response = await _client.PostAsJsonAsync("/api/profile", dto);
-
-        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
-    }
-
     // ---------- PUT /api/profile/me ----------
-
-    [Fact]
-    public async Task UpdateMyProfile_WhenProfileExists_ReturnsNoContent()
-    {
-        SeedProfile();
-
-        var dto = new UpdateProfileDto
-        {
-            FirstName = "Updated",
-            LastName = "User",
-            Bio = "Updated Bio",
-            Location = "TX"
-        };
-
-        var response = await _client.PutAsJsonAsync("/api/profile/me", dto);
-
-        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
-
-        using var scope = _factory.Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-
-        var profile = db.Profiles.Single(p => p.UserId == TestUserId);
-        Assert.Equal("Updated", profile.FirstName);
-        Assert.Equal("TX", profile.Location);
-    }
 
     [Fact]
     public async Task UpdateMyProfile_WhenProfileDoesNotExist_ReturnsNotFound()

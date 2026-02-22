@@ -15,9 +15,9 @@ namespace MentoringApp.Api.Controllers
     public class ProfileController : ControllerBase
     {
         private readonly ApplicationDbContext _db;
-        private readonly ProfileService _profileService;
+        private readonly IProfileService _profileService;
 
-        public ProfileController(ApplicationDbContext db, ProfileService profileService)
+        public ProfileController(ApplicationDbContext db, IProfileService profileService)
         {
             _db = db;
             _profileService = profileService;
@@ -73,15 +73,7 @@ namespace MentoringApp.Api.Controllers
                 return NotFound();
             }
 
-            UpdateProfileDto updateDto = new UpdateProfileDto
-            {
-                FirstName = dto.FirstName,
-                LastName = dto.LastName,
-                Bio = dto.Bio,
-                Location = dto.Location
-            };
-
-            await _profileService.UpdateProfile(profile.UserId, updateDto);
+            await _profileService.UpdateProfile(profile.UserId, dto);
 
             return Ok(ToDto(profile));
         }
@@ -92,18 +84,17 @@ namespace MentoringApp.Api.Controllers
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            var profile = await _db.Profiles
-                .FirstOrDefaultAsync(p => p.UserId == userId);
+            if (userId == null)
+            {
+                return Unauthorized("User cannot be found");
+            }
+
+            Profile? profile = await _profileService.GetByUserIdAsync(userId);
 
             if (profile == null)
                 return NotFound();
 
-            profile.FirstName = dto.FirstName;
-            profile.LastName = dto.LastName;
-            profile.Bio = dto.Bio;
-            profile.Location = dto.Location;
-
-            await _db.SaveChangesAsync();
+            await _profileService.UpdateProfile(userId, dto);
 
             return NoContent();
         }
