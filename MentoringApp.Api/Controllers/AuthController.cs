@@ -108,6 +108,9 @@ namespace MentoringApp.Api.Controllers
 
             if (!result.Succeeded) return Unauthorized("Invalid credentials");
 
+            // Actually sign in the user to create the authentication cookie
+            await _signInManager.SignInAsync(user, isPersistent: true);
+
             var accessToken = GenerateJwtToken(user);
 
             // generate and persist refresh token
@@ -124,7 +127,7 @@ namespace MentoringApp.Api.Controllers
             _db.RefreshTokens.Add(refresh);
             await _db.SaveChangesAsync();
 
-            // Set refresh token as Secure HttpOnly cookie. For cross-origin frontends, front-end must call with credentials: 'include'
+            // Set refresh token as Secure HttpOnly cookie
             Response.Cookies.Append("refreshToken", refreshToken, new CookieOptions
             {
                 HttpOnly = true,

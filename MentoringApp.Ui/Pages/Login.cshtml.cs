@@ -1,7 +1,6 @@
-﻿using System;
-using System.Net.Http;
-using System.Net.Http.Json;
-using System.Threading.Tasks;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -95,6 +94,9 @@ public class LoginModel : PageModel
             }
 
             HttpContext.Session.SetString("Jwt", loginResult.Token); // store access token in session
+
+            CreateClaimsAndSignIn();
+
             return RedirectToPage("/Index");
         }
         catch (HttpRequestException ex)
@@ -115,6 +117,28 @@ public class LoginModel : PageModel
             Error = "Unexpected error while attempting to log in. " + ex.Message;
             return Page();
         }
+    }
+
+
+    private async void CreateClaimsAndSignIn()
+    {
+        var claims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.Name, Email),
+                    new Claim(ClaimTypes.Email, Email)
+                };
+
+        var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+        var principal = new ClaimsPrincipal(identity);
+
+        await HttpContext.SignInAsync(
+            CookieAuthenticationDefaults.AuthenticationScheme,
+            principal,
+            new AuthenticationProperties
+            {
+                IsPersistent = true,
+                ExpiresUtc = DateTimeOffset.UtcNow.AddDays(7)
+            });
     }
 
     private async Task<IActionResult> HandleRegister()
