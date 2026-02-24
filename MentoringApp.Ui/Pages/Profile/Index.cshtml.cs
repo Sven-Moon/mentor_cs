@@ -74,4 +74,9 @@ public class IndexModel : PageModel
 
         return RedirectToPage();
     }
+
+    public IActionResult OnPostCancel()
+    {
+        return RedirectToPage();
+    }
 }

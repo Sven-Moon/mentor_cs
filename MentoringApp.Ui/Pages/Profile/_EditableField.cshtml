@@ -1,10 +1,10 @@
 ﻿@model (string FieldName, string Label, string Value)
 @{
-  var isEditing = false;
-  if (Context.Request.HasFormContentType)
-  {
-    isEditing = Context.Request.Form["EditingField"] == Model.FieldName;
-  }
+    var isEditing = false;
+    if (Context.Request.HasFormContentType)
+    {
+        isEditing = Context.Request.Form["field"] == Model.FieldName;
+    }
 }
 
 <div class="profile-row">
@@ -14,10 +14,11 @@
   {
     <form method="post" asp-page-handler="Update" class="inline-form">
       <input type="hidden" name="FieldName" value="@Model.FieldName" />
-      <input type="text" name="EditValue" value="@Model.Value" class="form-control" />
-
-      <button type="submit" class="btn btn-success">✔</button>
-      <button type="button" onclick="cancelEdit()" class="btn btn-danger">✖</button>
+        <input type="text" name="EditValue" value="@Model.Value" class="form-control" />
+        <button type="submit" class="btn btn-success">✔</button>
+    </form>
+    <form method="post" asp-page-handler="Cancel" style="display:inline;">
+        <button type="submit" class="btn btn-danger">✖</button>
     </form>
   }
   else
