@@ -13,7 +13,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     .AddCookie(options =>
     {
         options.LoginPath = "/Login";
-        options.LogoutPath = "/Logout";
+        //options.LogoutPath = "/Logout"; // middleware intercepts POST /Logout, signs the user out, and redirects to a default location (often the home page).
         options.ExpireTimeSpan = TimeSpan.FromDays(7);
     });
 
