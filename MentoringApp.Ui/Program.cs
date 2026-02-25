@@ -1,14 +1,17 @@
 using MentoringApp.Api.Data;
 using MentoringApp.Ui.Services;
+using MentoringApp.Ui.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
 using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
 
+#region Services
 // Memory cache required by session
 builder.Services.AddDistributedMemoryCache();
 
+// Authentication
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
@@ -17,6 +20,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.ExpireTimeSpan = TimeSpan.FromDays(7);
     });
 
+// Session
 builder.Services.AddSession(
 //    options =>
 //{     options.IdleTimeout = TimeSpan.FromMinutes(30);
@@ -28,28 +32,33 @@ builder.Services.AddSession(
 // IHttpContextAccessor for the DelegatingHandler
 builder.Services.AddHttpContextAccessor();
 
-// Register the handler
-builder.Services.AddScoped<BearerTokenHandler>();
+#region Registrations
 
+builder.Services.AddScoped<BearerTokenHandler>();
+builder.Services.AddScoped<IProfileService, ProfileService>();
+
+#endregion registrations
+
+// ApiClient
 builder.Services.AddHttpClient<ApiClient>("Api", client =>
 {
     // API's https port: 7263
     client.BaseAddress = new Uri(builder.Configuration["Api:BaseUrl"] ?? throw new InvalidOperationException("Missing configuration: Api:BaseUrl"));
 })
-.ConfigurePrimaryHttpMessageHandler(() =>
-{
-    return new HttpClientHandler
+    .ConfigurePrimaryHttpMessageHandler(() =>
     {
-        UseCookies = true,
-        CookieContainer = new CookieContainer(),
-    };
-})
-.AddHttpMessageHandler<BearerTokenHandler>(); // attach the handler so Authorization header is applied
+        return new HttpClientHandler
+        {
+            UseCookies = true,
+            CookieContainer = new CookieContainer(),
+        };
+    })
+    .AddHttpMessageHandler<BearerTokenHandler>(); // attach the handler so Authorization header is applied
 
 // DB
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-options.UseNpgsql(
-    builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(
+        builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Add services to the container: Razor Pages + Identity UI
 builder.Services.AddRazorPages()
@@ -58,7 +67,11 @@ builder.Services.AddRazorPages()
         options.Conventions.AllowAnonymousToFolder("/Identity");
     });
 
+#endregion services
+
 var app = builder.Build();
+
+#region App Config
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
@@ -68,5 +81,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapRazorPages();
+
+#endregion app config
 
 app.Run();

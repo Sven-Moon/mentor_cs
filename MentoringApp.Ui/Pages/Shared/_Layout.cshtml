@@ -1,4 +1,7 @@
-﻿<!DOCTYPE html>
+﻿@using MentoringApp.Ui.Services.Interfaces
+@inject IProfileService ProfileService
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -41,7 +44,13 @@
                         {
                           <li class="nav-item">
                               <span class="navbar-text me-2">
-                                  @User.Identity.Name
+                                  @{
+                                      var profile = await ProfileService.GetMyProfileAsync(throwOnError: false);
+                                      var displayName = !string.IsNullOrWhiteSpace(profile?.FirstName) 
+                                          ? profile.FirstName 
+                                          : User.Identity.Name;
+                                  }
+                                  @displayName
                               </span>
                           </li>
                           <li class="nav-item">

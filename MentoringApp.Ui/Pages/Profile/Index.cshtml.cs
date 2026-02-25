@@ -48,10 +48,10 @@ public class IndexModel : PageModel
 
         EditValue = field switch
         {
-            nameof(Profile.FirstName) => Profile.FirstName,
-            nameof(Profile.LastName) => Profile.LastName,
-            nameof(Profile.Bio) => Profile.Bio,
-            nameof(Profile.Location) => Profile.Location,
+            nameof(Profile.FirstName) => Profile?.FirstName ?? "Unknown User",
+            nameof(Profile.LastName) => Profile?.LastName ?? string.Empty,
+            nameof(Profile.Bio) => Profile?.Bio ?? string.Empty,
+            nameof(Profile.Location) => Profile?.Location ?? string.Empty,
             _ => string.Empty
         };
 

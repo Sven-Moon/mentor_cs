@@ -1,6 +1,7 @@
-﻿using System.Net.Http.Json;
-using MentoringApp.Api.DTOs.Auth;
+﻿using MentoringApp.Api.DTOs.Auth;
 using MentoringApp.Api.DTOs.Profiles;
+using MentoringApp.Api.Models;
+using System.Net.Http.Json;
 
 namespace MentoringApp.Ui.Services
 {
@@ -41,6 +42,10 @@ namespace MentoringApp.Ui.Services
             return await GetJsonAsync<ProfileDto>("/api/profile/me");
         }
 
+        public async Task<ProfileDto?> GetUserProfileAsync(int profileId)
+        {
+            return await GetJsonAsync<ProfileDto>($"/api/profile/{profileId}");
+        }
         public async Task UpdateProfileAsync(UpdateProfileDto dto)
         {
             await PostJsonAsync("/api/profile", dto);
