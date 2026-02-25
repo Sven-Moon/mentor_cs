@@ -1,7 +1,5 @@
 ﻿using MentoringApp.Api.DTOs.Auth;
 using MentoringApp.Api.DTOs.Profiles;
-using MentoringApp.Api.Models;
-using System.Net.Http.Json;
 
 namespace MentoringApp.Ui.Services
 {
@@ -27,7 +25,8 @@ namespace MentoringApp.Ui.Services
         public async Task<AuthResponseDto> LoginAsync(LoginRequestDto dto)
         {
             var response = await PostAsync("/api/auth/login", dto);
-            return await response.Content.ReadFromJsonAsync<AuthResponseDto>()!;
+            var result = await response.Content.ReadFromJsonAsync<AuthResponseDto>();
+            return result ?? throw new ApiException(500, "Failed to deserialize login response");
         }
 
         public async Task LogoutAsync()
@@ -46,6 +45,7 @@ namespace MentoringApp.Ui.Services
         {
             return await GetJsonAsync<ProfileDto>($"/api/profile/{profileId}");
         }
+
         public async Task UpdateProfileAsync(UpdateProfileDto dto)
         {
             await PostJsonAsync("/api/profile", dto);
@@ -87,7 +87,7 @@ namespace MentoringApp.Ui.Services
             throw new ApiException((int)response.StatusCode, content);
         }
 
-        private async Task<HttpResponseMessage> SendAsync(HttpMethod method, string url, HttpContent content = null)
+        private async Task<HttpResponseMessage> SendAsync(HttpMethod method, string url, HttpContent? content = null)
         {
             using var request = new HttpRequestMessage(method, url) {  Content = content };
 
@@ -97,12 +97,12 @@ namespace MentoringApp.Ui.Services
             {
                 if (ctx.Request.Headers.TryGetValue("Authorization", out var authValues) && !string.IsNullOrEmpty(authValues))
                 {
-                    request.Headers.TryAddWithoutValidation("Authorization", (string)authValues);
+                    request.Headers.TryAddWithoutValidation("Authorization", authValues.ToString());
                 }
 
                 if (ctx.Request.Headers.TryGetValue("Cookie", out var cookieValues) && !string.IsNullOrEmpty(cookieValues))
                 {
-                    request.Headers.TryAddWithoutValidation("Cookie", (string)cookieValues);
+                    request.Headers.TryAddWithoutValidation("Cookie", cookieValues.ToString());
                 }
             }
 
