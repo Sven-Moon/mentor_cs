@@ -1,5 +1,5 @@
 namespace MentoringApp.Api.DTOs.Auth
-{ 
+{
     public class RegisterRequestDto
     {
         public required string Email { get; set; }

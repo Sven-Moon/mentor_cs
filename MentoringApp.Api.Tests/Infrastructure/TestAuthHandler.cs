@@ -1,8 +1,8 @@
-using System.Security.Claims;
-using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using System.Security.Claims;
+using System.Text.Encodings.Web;
 
 
 namespace MentoringApp.Api.Tests.Infrastructure;
@@ -24,9 +24,9 @@ public class TestAuthHandler
     {
         var claims = new[]
         {
-            new Claim(ClaimTypes.NameIdentifier, TestUserId),
-            new Claim(ClaimTypes.Role, "Admin")
-        };
+                        new Claim(ClaimTypes.NameIdentifier, TestUserId),
+                        new Claim(ClaimTypes.Role, "Admin")
+                };
 
 
         var identity = new ClaimsIdentity(claims, "Test");

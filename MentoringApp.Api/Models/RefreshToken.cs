@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace MentoringApp.Api.Models
+﻿namespace MentoringApp.Api.Models
 {
     public class RefreshToken
     {

@@ -7,7 +7,7 @@ namespace MentoringApp.Api.Models
         public int Id { get; set; }
 
         // Foreign keys
-        public required string  UserId { get; set; }
+        public required string UserId { get; set; }
         public int SkillId { get; set; }
 
         // properties

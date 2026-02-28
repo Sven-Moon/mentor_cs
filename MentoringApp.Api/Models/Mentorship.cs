@@ -1,6 +1,4 @@
 using MentoringApp.Api.Identity;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MentoringApp.Api.Models
 {

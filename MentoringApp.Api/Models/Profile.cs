@@ -1,4 +1,3 @@
-using System;
 using MentoringApp.Api.Identity;
 
 namespace MentoringApp.Api.Models

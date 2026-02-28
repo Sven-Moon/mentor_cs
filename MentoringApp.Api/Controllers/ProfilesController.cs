@@ -1,11 +1,11 @@
 using MentoringApp.Api.Data;
 using MentoringApp.Api.DTOs.Profiles;
 using MentoringApp.Api.Models;
+using MentoringApp.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
-using MentoringApp.Api.Services;
 
 namespace MentoringApp.Api.Controllers
 {
@@ -30,8 +30,8 @@ namespace MentoringApp.Api.Controllers
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             var profile = await _db.Profiles
-                .AsNoTracking()
-                .FirstOrDefaultAsync(p => p.UserId == userId);
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(p => p.UserId == userId);
 
             if (profile == null)
                 return NotFound();
@@ -66,7 +66,7 @@ namespace MentoringApp.Api.Controllers
 
             // Load existing profile for the user
             Profile? profile = await _db.Profiles
-                .FirstOrDefaultAsync(p => p.UserId == userId);
+                    .FirstOrDefaultAsync(p => p.UserId == userId);
 
             if (profile == null)
             {

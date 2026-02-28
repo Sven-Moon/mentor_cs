@@ -1,6 +1,5 @@
 using MentoringApp.Api.Data;
 using MentoringApp.Api.DTOs.Auth;
-using MentoringApp.Api.DTOs.Common;
 using MentoringApp.Api.Identity;
 using MentoringApp.Api.Models;
 using MentoringApp.Api.Services;
@@ -8,13 +7,10 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace MentoringApp.Api.Controllers
 {
@@ -29,11 +25,11 @@ namespace MentoringApp.Api.Controllers
         private readonly IProfileService _profileService;
 
         public AuthController(
-            UserManager<ApplicationUser> userManager,
-            SignInManager<ApplicationUser> signInManager,
-            IConfiguration config,
-            ApplicationDbContext db,
-            IProfileService profileService)
+                UserManager<ApplicationUser> userManager,
+                SignInManager<ApplicationUser> signInManager,
+                IConfiguration config,
+                ApplicationDbContext db,
+                IProfileService profileService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -151,8 +147,8 @@ namespace MentoringApp.Api.Controllers
                 return Unauthorized("No refresh token");
 
             var existing = await _db.RefreshTokens
-                .AsNoTracking()
-                .FirstOrDefaultAsync(rt => rt.Token == incomingToken && !rt.Revoked);
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(rt => rt.Token == incomingToken && !rt.Revoked);
 
             if (existing == null || existing.ExpiresAt < DateTime.UtcNow)
                 return Unauthorized("Invalid refresh token");
@@ -233,20 +229,20 @@ namespace MentoringApp.Api.Controllers
             var audience = _config["Jwt:Audience"] ?? throw new InvalidOperationException("Configuration value 'Jwt:Audience' is not set.");
 
             var claims = new List<Claim>
-            {
-                new Claim(JwtRegisteredClaimNames.Sub, user.Id),
-                new Claim(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty)
-            };
+                        {
+                                new Claim(JwtRegisteredClaimNames.Sub, user.Id),
+                                new Claim(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty)
+                        };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(keyValue));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var token = new JwtSecurityToken(
-                issuer: issuer,
-                audience: audience,
-                claims: claims,
-                expires: DateTime.UtcNow.AddDays(7),
-                signingCredentials: creds
+                    issuer: issuer,
+                    audience: audience,
+                    claims: claims,
+                    expires: DateTime.UtcNow.AddDays(7),
+                    signingCredentials: creds
             );
 
             return new JwtSecurityTokenHandler().WriteToken(token);

@@ -38,17 +38,17 @@ namespace MentoringApp.Api.Services
                 throw new ArgumentException("User ID cannot be null or empty.", nameof(userId));
 
             return await _db.Profiles
-                .AsNoTracking()
-                .FirstOrDefaultAsync(p => p.UserId == userId);
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(p => p.UserId == userId);
         }
 
         public async Task<Profile?> GetByIdAsync(int id)
         {
             if (id <= 0)
                 throw new ArgumentException("Profile ID must be a positive integer.", nameof(id));
-            
+
             Profile? profile = await _db.Profiles
-                .FirstOrDefaultAsync(p => p.Id == id);
+                    .FirstOrDefaultAsync(p => p.Id == id);
 
             if (profile == null)
             {
@@ -91,7 +91,7 @@ namespace MentoringApp.Api.Services
             existingProfile.Bio = dto.Bio;
 
             _db.Profiles.Update(existingProfile);
-            
+
             await _db.SaveChangesAsync();
         }
 
@@ -110,8 +110,8 @@ namespace MentoringApp.Api.Services
                 throw new InvalidOperationException($"No profile found for user ID '{userId}'.");
             }
         }
-       
+
     }
 }
 
-    
+

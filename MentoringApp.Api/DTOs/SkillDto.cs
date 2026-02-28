@@ -1,6 +1,4 @@
-﻿using MentoringApp.Api.Models;
-
-namespace MentoringApp.Api.DTOs
+﻿namespace MentoringApp.Api.DTOs
 {
     public class SkillDto
     {

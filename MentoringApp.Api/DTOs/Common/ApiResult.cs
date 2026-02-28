@@ -1,7 +1,4 @@
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 
 namespace MentoringApp.Api.DTOs.Common
 {
@@ -15,7 +12,7 @@ namespace MentoringApp.Api.DTOs.Common
         public static ApiResult Success() => new() { IsSuccess = true };
 
         public static ApiResult Fail(params string[] errors) =>
-            new() { IsSuccess = false, Errors = new ReadOnlyCollection<string>((errors ?? Array.Empty<string>()).ToList()) };
+                new() { IsSuccess = false, Errors = new ReadOnlyCollection<string>((errors ?? Array.Empty<string>()).ToList()) };
     }
 
     public sealed record ApiResult<T> : ApiResult
@@ -23,9 +20,9 @@ namespace MentoringApp.Api.DTOs.Common
         public T? Data { get; init; }
 
         public static ApiResult<T> Success(T data) =>
-            new() { IsSuccess = true, Data = data };
+                new() { IsSuccess = true, Data = data };
 
         public static new ApiResult<T> Fail(params string[] errors) =>
-            new() { IsSuccess = false, Errors = new ReadOnlyCollection<string>((errors ?? Array.Empty<string>()).ToList()) };
+                new() { IsSuccess = false, Errors = new ReadOnlyCollection<string>((errors ?? Array.Empty<string>()).ToList()) };
     }
 }

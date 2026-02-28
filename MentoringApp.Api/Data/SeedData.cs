@@ -18,12 +18,13 @@ namespace MentoringApp.Api.Data
             if (context.Database.IsNpgsql())
             {
                 await context.Database.MigrateAsync();
-            } else
+            }
+            else
             {
                 context.Database.EnsureCreated();
             }
 
-                await SeedRoles(roleManager);
+            await SeedRoles(roleManager);
             var adminUser = await SeedAdminUser(userManager);
             var regularUser = await SeedRegularUser(userManager);
             await SeedSkills(context);

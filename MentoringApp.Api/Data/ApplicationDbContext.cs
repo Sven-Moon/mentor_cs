@@ -1,13 +1,13 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using MentoringApp.Api.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using MentoringApp.Api.Models;
 
 namespace MentoringApp.Api.Data
 {
     public class ApplicationDbContext : IdentityDbContext
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-            : base(options) { }
+                : base(options) { }
 
         public DbSet<Profile> Profiles { get; set; }
         public DbSet<Skill> Skills { get; set; }
@@ -28,9 +28,9 @@ namespace MentoringApp.Api.Data
                 entity.HasKey(p => p.Id);
 
                 entity.HasOne(p => p.User)
-                .WithOne(u => u.Profile)
-                .HasForeignKey<Profile>(p => p.UserId)
-                .OnDelete(DeleteBehavior.Cascade); // disable only
+                            .WithOne(u => u.Profile)
+                            .HasForeignKey<Profile>(p => p.UserId)
+                            .OnDelete(DeleteBehavior.Cascade); // disable only
             });
 
             // -------------------------------------
@@ -41,8 +41,8 @@ namespace MentoringApp.Api.Data
                 entity.HasKey(s => s.Id);
 
                 entity.Property(s => s.Name)
-                .IsRequired()
-                .HasMaxLength(150);
+                            .IsRequired()
+                            .HasMaxLength(150);
             });
 
             // -------------------------------------
@@ -53,14 +53,14 @@ namespace MentoringApp.Api.Data
                 entity.HasKey(us => us.Id);
 
                 entity.HasOne(us => us.User)
-                .WithMany(u => u.UserSkills)
-                .HasForeignKey(us => us.UserId)
-                .OnDelete(DeleteBehavior.Restrict);
+                            .WithMany(u => u.UserSkills)
+                            .HasForeignKey(us => us.UserId)
+                            .OnDelete(DeleteBehavior.Restrict);
 
                 entity.HasOne(us => us.Skill)
-                .WithMany(s => s.UserSkills)
-                .HasForeignKey(us => us.SkillId)
-                .OnDelete(DeleteBehavior.Cascade);
+                            .WithMany(s => s.UserSkills)
+                            .HasForeignKey(us => us.SkillId)
+                            .OnDelete(DeleteBehavior.Cascade);
             });
 
             // -------------------------------------
@@ -71,22 +71,22 @@ namespace MentoringApp.Api.Data
                 entity.HasKey(m => m.Id);
 
                 entity.HasOne(m => m.Mentor)
-                .WithMany(u => u.MentorshipsAsMentor)
-                .HasForeignKey(m => m.MentorId)
-                .OnDelete(DeleteBehavior.Restrict);
+                            .WithMany(u => u.MentorshipsAsMentor)
+                            .HasForeignKey(m => m.MentorId)
+                            .OnDelete(DeleteBehavior.Restrict);
 
                 entity.HasOne(m => m.Mentee)
-                .WithMany(u => u.MentorshipAsMentee)
-                .HasForeignKey(m => m.MenteeId)
-                .OnDelete(DeleteBehavior.Restrict);
+                            .WithMany(u => u.MentorshipAsMentee)
+                            .HasForeignKey(m => m.MenteeId)
+                            .OnDelete(DeleteBehavior.Restrict);
 
                 // concurrency -- not included in sqlite test db
                 if (Database.IsNpgsql())
                 {
                     entity.Property<uint>("xmin")
-                        .HasColumnName("xmin")
-                        .HasColumnType("xid")
-                        .IsRowVersion();
+                                        .HasColumnName("xmin")
+                                        .HasColumnType("xid")
+                                        .IsRowVersion();
                 }
             });
 
@@ -98,19 +98,19 @@ namespace MentoringApp.Api.Data
                 entity.HasKey(t => t.Id);
 
                 entity.HasOne(t => t.Recipient)
-                .WithMany(u => u.ReceivedTestimonials)
-                .HasForeignKey(t => t.RecipientId)
-                .OnDelete(DeleteBehavior.Restrict);
+                            .WithMany(u => u.ReceivedTestimonials)
+                            .HasForeignKey(t => t.RecipientId)
+                            .OnDelete(DeleteBehavior.Restrict);
 
                 entity.HasOne(t => t.Author)
-                .WithMany(u => u.WrittenTestimonials)
-                .HasForeignKey(t => t.AuthorId)
-                .OnDelete(DeleteBehavior.Restrict);
+                            .WithMany(u => u.WrittenTestimonials)
+                            .HasForeignKey(t => t.AuthorId)
+                            .OnDelete(DeleteBehavior.Restrict);
 
                 entity.HasOne(t => t.Mentorship)
-                .WithMany(m => m.Testimonials)
-                .HasForeignKey(t => t.MentorshipId)
-                .OnDelete(DeleteBehavior.Cascade);
+                            .WithMany(m => m.Testimonials)
+                            .HasForeignKey(t => t.MentorshipId)
+                            .OnDelete(DeleteBehavior.Cascade);
             });
 
             // RefreshToken basic mapping (optional)

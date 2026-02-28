@@ -1,7 +1,7 @@
+using MentoringApp.Api.DTOs.Profiles;
 using MentoringApp.Ui.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using MentoringApp.Api.DTOs.Profiles;
 
 namespace MentoringApp.Ui.Pages.Profile;
 
@@ -17,11 +17,12 @@ public class IndexModel : PageModel
     private readonly ApiClient _apiClient;
 
     // Use the API DTO type (from MentoringApp.Api.DTOs.Profiles) to avoid the implicit conversion error.
-    public ProfileDto Profile { get; set; } = new ProfileDto { 
-        FirstName = "", 
-        LastName = "", 
-        Location = "", 
-        UserId = "", 
+    public ProfileDto Profile { get; set; } = new ProfileDto
+    {
+        FirstName = "",
+        LastName = "",
+        Location = "",
+        UserId = "",
         Bio = ""
     };
 
@@ -34,6 +35,8 @@ public class IndexModel : PageModel
     public string EditingField { get; set; } = string.Empty;
 
     #endregion properties
+
+    #region Public Methods
 
     public async Task OnGetAsync()
     {
@@ -79,4 +82,6 @@ public class IndexModel : PageModel
     {
         return RedirectToPage();
     }
+
+    #endregion Public Methods
 }

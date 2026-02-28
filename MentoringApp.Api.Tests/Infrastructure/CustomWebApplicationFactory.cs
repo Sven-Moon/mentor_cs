@@ -10,17 +10,17 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 namespace MentoringApp.Api.Tests.Infrastructure;
 
 public class CustomWebApplicationFactory
-    : WebApplicationFactory<Program>
+        : WebApplicationFactory<Program>
 {
     private SqliteConnection _connection = default!;
 
-  /// <summary>
-  ///  removes any current ApplicationDbContext registration
-  ///  adds a new ApplicationDbContext using an in-memory Sqlite database
-  ///  with authentication scheme for testing
-  /// </summary>
-  /// <param name="builder"></param>
-  protected override void ConfigureWebHost(IWebHostBuilder builder)
+    /// <summary>
+    ///  removes any current ApplicationDbContext registration
+    ///  adds a new ApplicationDbContext using an in-memory Sqlite database
+    ///  with authentication scheme for testing
+    /// </summary>
+    /// <param name="builder"></param>
+    protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         // Configure for Jwt-based authentication
         // (see Login_WithValidCredentials_ReturnsJwtToken & Login_ReturnsJwt_WithExpectedClaims)
@@ -48,25 +48,25 @@ public class CustomWebApplicationFactory
             _connection.Open();
 
             services.AddDbContext<ApplicationDbContext>(options =>
-            {
-                options.UseSqlite(_connection);
-                options.ConfigureWarnings(w =>
-                    w.Ignore(RelationalEventId.PendingModelChangesWarning));
-            });
+                    {
+                        options.UseSqlite(_connection);
+                        options.ConfigureWarnings(w =>
+                                        w.Ignore(RelationalEventId.PendingModelChangesWarning));
+                    });
 
             services.AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = "Test";
-                options.DefaultChallengeScheme = "Test";
-            })
-            .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(
-                "Test", options => { });
+                    {
+                        options.DefaultAuthenticateScheme = "Test";
+                        options.DefaultChallengeScheme = "Test";
+                    })
+                    .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(
+                            "Test", options => { });
 
             services.AddAuthorization();
         });
 
 
-  }
+    }
 
     protected override void Dispose(bool disposing)
     {

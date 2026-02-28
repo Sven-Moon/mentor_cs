@@ -16,9 +16,9 @@ builder.Services.AddCors(options =>
     options.AddDefaultPolicy(policy =>
     {
         policy.WithOrigins("https://localhost:3000") // update to your React origin
-              .AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowCredentials();
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .AllowCredentials();
     });
 });
 
@@ -32,18 +32,18 @@ builder.Services.AddControllers();
 if (builder.Environment.IsEnvironment("Testing"))
 {
     builder.Services.AddDbContext<ApplicationDbContext>(options =>
-        options.UseSqlite("DataSource=:memory:"));
+            options.UseSqlite("DataSource=:memory:"));
 }
 else
 {
     builder.Services.AddDbContext<ApplicationDbContext>(options =>
-        options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+            options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 }
 
 // Identity
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
-    .AddEntityFrameworkStores<ApplicationDbContext>()
-    .AddDefaultTokenProviders();
+        .AddEntityFrameworkStores<ApplicationDbContext>()
+        .AddDefaultTokenProviders();
 
 // Authentication
 builder.Services.AddAuthentication(options =>
@@ -61,8 +61,8 @@ builder.Services.AddAuthentication(options =>
         ValidIssuer = builder.Configuration["Jwt:Issuer"],
         ValidAudience = builder.Configuration["Jwt:Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!)
-        )
+                    Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!)
+            )
     };
 });
 builder.Services.AddScoped<IProfileService, ProfileService>();
@@ -85,11 +85,11 @@ using (var scope = app.Services.CreateScope())
 if (app.Environment.IsDevelopment())
 {
     /* 
-     * 1.	Creates an endpoint (typically at /openapi/v1.json) that returns a JSON document describing your API
-     * 2.	Auto-generates documentation based on your controllers, actions, parameters, and return types
-     * 3.	Provides machine-readable API metadata that tools can consume
-     * builder.Services.AddOpenApi() makes MapOpenApi() available to call
-    */
+	 * 1.	Creates an endpoint (typically at /openapi/v1.json) that returns a JSON document describing your API
+	 * 2.	Auto-generates documentation based on your controllers, actions, parameters, and return types
+	 * 3.	Provides machine-readable API metadata that tools can consume
+	 * builder.Services.AddOpenApi() makes MapOpenApi() available to call
+	*/
     app.MapOpenApi();
 }
 

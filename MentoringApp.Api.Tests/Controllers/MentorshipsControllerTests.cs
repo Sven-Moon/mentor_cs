@@ -1,7 +1,6 @@
-﻿using MentoringApp.Api.Tests.Helpers;
-using MentoringApp.Api.Identity;
-
+﻿using MentoringApp.Api.Identity;
 using MentoringApp.Api.Models;
+using MentoringApp.Api.Tests.Helpers;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MentoringApp.Api.Tests.Controllers;
@@ -27,25 +26,27 @@ public class MentorshipsControllerTests
         context.Users.AddRange(mentor1, mentee1, mentor2, mentee2);
 
         context.Mentorships.AddRange(
-            new Mentorship { 
-                MentorId = mentor1.Id, 
-                MenteeId = mentee1.Id, 
-                Scope = "Scope1", 
-                Status = "Active",
-            },
-            new Mentorship { 
-                MentorId = mentor2.Id, 
-                MenteeId = mentee2.Id, 
-                Scope = "Scope2", 
-                Status = "Inactive",
-            }
-            );
+                new Mentorship
+                {
+                    MentorId = mentor1.Id,
+                    MenteeId = mentee1.Id,
+                    Scope = "Scope1",
+                    Status = "Active",
+                },
+                new Mentorship
+                {
+                    MentorId = mentor2.Id,
+                    MenteeId = mentee2.Id,
+                    Scope = "Scope2",
+                    Status = "Inactive",
+                }
+                );
 
         await context.SaveChangesAsync();
 
         var userManager = MockUserManager<ApplicationUser>.Create();
 
-            var controller = ControllerTestHelper.Create(
+        var controller = ControllerTestHelper.Create(
                 context,
                 userManager.Object, // userManager: type error
                 userId: "admin",

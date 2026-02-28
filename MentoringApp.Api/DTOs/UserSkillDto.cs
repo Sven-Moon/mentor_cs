@@ -1,13 +1,11 @@
-﻿using MentoringApp.Api.Identity;
-
-namespace MentoringApp.Api.DTOs
+﻿namespace MentoringApp.Api.DTOs
 {
     public class UserSkillDto
     {
         public int Id { get; set; }
 
         // Foreign keys
-        public required string  UserId { get; set; }
+        public required string UserId { get; set; }
         public int SkillId { get; set; }
 
         // properties
