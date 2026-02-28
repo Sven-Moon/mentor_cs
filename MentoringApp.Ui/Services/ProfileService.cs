@@ -1,5 +1,4 @@
 ﻿using MentoringApp.Api.DTOs.Profiles;
-using MentoringApp.Api.Models;
 using MentoringApp.Ui.Services.Interfaces;
 
 namespace MentoringApp.Ui.Services

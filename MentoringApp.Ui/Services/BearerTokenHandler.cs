@@ -2,7 +2,7 @@
 
 namespace MentoringApp.Ui.Services
 {
-    public class BearerTokenHandler : DelegatingHandler 
+    public class BearerTokenHandler : DelegatingHandler
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
 

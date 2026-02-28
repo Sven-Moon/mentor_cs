@@ -89,7 +89,7 @@ namespace MentoringApp.Ui.Services
 
         private async Task<HttpResponseMessage> SendAsync(HttpMethod method, string url, HttpContent? content = null)
         {
-            using var request = new HttpRequestMessage(method, url) {  Content = content };
+            using var request = new HttpRequestMessage(method, url) { Content = content };
 
             // forward Authorization and Cookie headers from the current HTTP context if available.
             var ctx = _httpContextAccessor.HttpContext;

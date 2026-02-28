@@ -1,8 +1,8 @@
-﻿using System.Security.Claims;
-using Microsoft.AspNetCore.Authentication;
+﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using System.Security.Claims;
 
 namespace MentoringApp.Ui.Pages;
 
@@ -52,12 +52,12 @@ public class LoginModel : PageModel
         try
         {
             HttpResponseMessage response = await _httpClient.PostAsJsonAsync(
-                "/api/auth/login",
-                new
-                {
-                    email = Email,
-                    password = Password
-                });
+                            "/api/auth/login",
+                            new
+                            {
+                                email = Email,
+                                password = Password
+                            });
 
             if (!response.IsSuccessStatusCode)
             {
@@ -123,22 +123,22 @@ public class LoginModel : PageModel
     private async void CreateClaimsAndSignIn()
     {
         var claims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.Name, Email),
-                    new Claim(ClaimTypes.Email, Email)
-                };
+                                                                {
+                                                                                new Claim(ClaimTypes.Name, Email),
+                                                                                new Claim(ClaimTypes.Email, Email)
+                                                                };
 
         var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
         var principal = new ClaimsPrincipal(identity);
 
         await HttpContext.SignInAsync(
-            CookieAuthenticationDefaults.AuthenticationScheme,
-            principal,
-            new AuthenticationProperties
-            {
-                IsPersistent = true,
-                ExpiresUtc = DateTimeOffset.UtcNow.AddDays(7)
-            });
+                        CookieAuthenticationDefaults.AuthenticationScheme,
+                        principal,
+                        new AuthenticationProperties
+                        {
+                            IsPersistent = true,
+                            ExpiresUtc = DateTimeOffset.UtcNow.AddDays(7)
+                        });
     }
 
     private async Task<IActionResult> HandleRegister()
@@ -150,12 +150,12 @@ public class LoginModel : PageModel
         }
 
         var response = await _httpClient.PostAsJsonAsync(
-            "/api/auth/register",
-            new
-            {
-                email = RegisterEmail,
-                password = RegisterPassword
-            });
+                        "/api/auth/register",
+                        new
+                        {
+                            email = RegisterEmail,
+                            password = RegisterPassword
+                        });
 
         if (!response.IsSuccessStatusCode)
         {

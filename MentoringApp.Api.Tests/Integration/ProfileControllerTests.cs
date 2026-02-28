@@ -7,7 +7,7 @@ using MentoringApp.Api.Tests.Infrastructure;
 namespace MentoringApp.Api.Tests.Integration;
 
 public class ProfileControllerTests
-    : IClassFixture<CustomWebApplicationFactory>
+        : IClassFixture<CustomWebApplicationFactory>
 {
     private readonly HttpClient _client;
     private readonly CustomWebApplicationFactory _factory;

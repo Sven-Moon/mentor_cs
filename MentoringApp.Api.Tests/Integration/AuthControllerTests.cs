@@ -1,197 +1,197 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+﻿using MentoringApp.Api.Data;
 using MentoringApp.Api.DTOs.Auth;
-using MentoringApp.Api.Data;
 using MentoringApp.Api.Tests.Infrastructure;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace MentoringApp.Api.Tests.Integration;
 
 public class AuthControllerTests
-    : IClassFixture<CustomWebApplicationFactory>
+        : IClassFixture<CustomWebApplicationFactory>
 {
-  private readonly HttpClient _client;
-  private readonly CustomWebApplicationFactory _factory;
+    private readonly HttpClient _client;
+    private readonly CustomWebApplicationFactory _factory;
 
-  public AuthControllerTests(CustomWebApplicationFactory factory)
-  {
-    _factory = factory;
-    _client = factory.CreateClient();
-
-    using var scope = factory.Services.CreateScope();
-    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    db.Database.EnsureDeleted();
-    db.Database.EnsureCreated();
-  }
-
-  #region Register
-
-  [Fact]
-  public async Task Register_WithValidCredentials_ReturnsOk()
-  {
-    // Arrange
-    var dto = new LoginRequestDto
+    public AuthControllerTests(CustomWebApplicationFactory factory)
     {
-      Email = "newuser@test.com",
-      Password = "StrongPassword123!"
-    };
+        _factory = factory;
+        _client = factory.CreateClient();
 
-    // Act
-    var response = await _client.PostAsJsonAsync("/api/auth/register", dto);
+        using var scope = factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        db.Database.EnsureDeleted();
+        db.Database.EnsureCreated();
+    }
 
-    // Assert
-    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    #region Register
 
-    var content = await response.Content.ReadAsStringAsync();
-    Assert.Contains("Registration successful", content);
-  }
-
-  [Fact]
-  public async Task Register_WithDuplicateEmail_ReturnsBadRequest()
-  {
-    // Arrange
-    var dto = new LoginRequestDto
+    [Fact]
+    public async Task Register_WithValidCredentials_ReturnsOk()
     {
-      Email = "duplicate@test.com",
-      Password = "StrongPassword123!"
-    };
+        // Arrange
+        var dto = new LoginRequestDto
+        {
+            Email = "newuser@test.com",
+            Password = "StrongPassword123!"
+        };
 
-    await _client.PostAsJsonAsync("/api/auth/register", dto);
+        // Act
+        var response = await _client.PostAsJsonAsync("/api/auth/register", dto);
 
-    // Act
-    var response = await _client.PostAsJsonAsync("/api/auth/register", dto);
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-    // Assert
-    Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-  }
+        var content = await response.Content.ReadAsStringAsync();
+        Assert.Contains("Registration successful", content);
+    }
 
-  [Fact]
-  public async Task Register_WithWeakPassword_ReturnsBadRequest()
-  {
-    // Arrange
-    var dto = new LoginRequestDto
+    [Fact]
+    public async Task Register_WithDuplicateEmail_ReturnsBadRequest()
     {
-      Email = "weakpass@test.com",
-      Password = "123"
-    };
-
-    // Act
-    var response = await _client.PostAsJsonAsync("/api/auth/register", dto);
-
-    // Assert
-    Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-  }
-
-  #endregion
-
-  #region Login
-
-  [Fact]
-  public async Task Login_WithValidCredentials_ReturnsJwtToken()
-  {
-    // Arrange
-    var email = "loginuser@test.com";
-    var password = "StrongPassword123!";
-
-    await _client.PostAsJsonAsync("/api/auth/register",
-        new LoginRequestDto
+        // Arrange
+        var dto = new LoginRequestDto
         {
-          Email = email,
-          Password = password
-        });
+            Email = "duplicate@test.com",
+            Password = "StrongPassword123!"
+        };
 
-    // Act
-    var response = await _client.PostAsJsonAsync("/api/auth/login",
-        new LoginRequestDto
+        await _client.PostAsJsonAsync("/api/auth/register", dto);
+
+        // Act
+        var response = await _client.PostAsJsonAsync("/api/auth/register", dto);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Register_WithWeakPassword_ReturnsBadRequest()
+    {
+        // Arrange
+        var dto = new LoginRequestDto
         {
-          Email = email,
-          Password = password
-        });
+            Email = "weakpass@test.com",
+            Password = "123"
+        };
 
-    // Assert
-    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        // Act
+        var response = await _client.PostAsJsonAsync("/api/auth/register", dto);
 
-    var authResponse = await response.Content.ReadFromJsonAsync<AuthResponseDto>();
-    Assert.NotNull(authResponse);
-    Assert.False(string.IsNullOrWhiteSpace(authResponse!.Token));
-    Assert.Equal(email, authResponse.Email);
-  }
+        // Assert
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
 
-  [Fact]
-  public async Task Login_WithWrongPassword_ReturnsUnauthorized()
-  {
-    // Arrange
-    var email = "wrongpass@test.com";
+    #endregion
 
-    await _client.PostAsJsonAsync("/api/auth/register",
-        new LoginRequestDto
-        {
-          Email = email,
-          Password = "CorrectPassword123!"
-        });
+    #region Login
 
-    // Act
-    var response = await _client.PostAsJsonAsync("/api/auth/login",
-        new LoginRequestDto
-        {
-          Email = email,
-          Password = "WrongPassword!"
-        });
+    [Fact]
+    public async Task Login_WithValidCredentials_ReturnsJwtToken()
+    {
+        // Arrange
+        var email = "loginuser@test.com";
+        var password = "StrongPassword123!";
 
-    // Assert
-    Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
-  }
+        await _client.PostAsJsonAsync("/api/auth/register",
+                new LoginRequestDto
+                {
+                    Email = email,
+                    Password = password
+                });
 
-  [Fact]
-  public async Task Login_WithUnknownEmail_ReturnsUnauthorized()
-  {
-    // Act
-    var response = await _client.PostAsJsonAsync("/api/auth/login",
-        new LoginRequestDto
-        {
-          Email = "doesnotexist@test.com",
-          Password = "AnyPassword123!"
-        });
+        // Act
+        var response = await _client.PostAsJsonAsync("/api/auth/login",
+                new LoginRequestDto
+                {
+                    Email = email,
+                    Password = password
+                });
 
-    // Assert
-    Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
-  }
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-  #endregion
+        var authResponse = await response.Content.ReadFromJsonAsync<AuthResponseDto>();
+        Assert.NotNull(authResponse);
+        Assert.False(string.IsNullOrWhiteSpace(authResponse!.Token));
+        Assert.Equal(email, authResponse.Email);
+    }
 
-  #region JWT Validation
+    [Fact]
+    public async Task Login_WithWrongPassword_ReturnsUnauthorized()
+    {
+        // Arrange
+        var email = "wrongpass@test.com";
 
-  [Fact]
-  public async Task Login_ReturnsJwt_WithExpectedClaims()
-  {
-    // Arrange
-    var email = "claims@test.com";
-    var password = "StrongPassword123!";
+        await _client.PostAsJsonAsync("/api/auth/register",
+                new LoginRequestDto
+                {
+                    Email = email,
+                    Password = "CorrectPassword123!"
+                });
 
-    await _client.PostAsJsonAsync("/api/auth/register",
-        new LoginRequestDto
-        {
-          Email = email,
-          Password = password
-        });
+        // Act
+        var response = await _client.PostAsJsonAsync("/api/auth/login",
+                new LoginRequestDto
+                {
+                    Email = email,
+                    Password = "WrongPassword!"
+                });
 
-    var response = await _client.PostAsJsonAsync("/api/auth/login",
-        new LoginRequestDto
-        {
-          Email = email,
-          Password = password
-        });
+        // Assert
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
 
-    var authResponse = await response.Content.ReadFromJsonAsync<AuthResponseDto>();
-    var handler = new JwtSecurityTokenHandler();
+    [Fact]
+    public async Task Login_WithUnknownEmail_ReturnsUnauthorized()
+    {
+        // Act
+        var response = await _client.PostAsJsonAsync("/api/auth/login",
+                new LoginRequestDto
+                {
+                    Email = "doesnotexist@test.com",
+                    Password = "AnyPassword123!"
+                });
 
-    // Act
-    var jwt = handler.ReadJwtToken(authResponse!.Token);
+        // Assert
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
 
-    // Assert
-    Assert.Contains(jwt.Claims, c => c.Type == JwtRegisteredClaimNames.Email && c.Value == email);
-    Assert.Contains(jwt.Claims, c => c.Type == JwtRegisteredClaimNames.Sub);
+    #endregion
 
-    Assert.True(jwt.ValidTo > DateTime.UtcNow);
-  }
+    #region JWT Validation
 
-  #endregion
+    [Fact]
+    public async Task Login_ReturnsJwt_WithExpectedClaims()
+    {
+        // Arrange
+        var email = "claims@test.com";
+        var password = "StrongPassword123!";
+
+        await _client.PostAsJsonAsync("/api/auth/register",
+                new LoginRequestDto
+                {
+                    Email = email,
+                    Password = password
+                });
+
+        var response = await _client.PostAsJsonAsync("/api/auth/login",
+                new LoginRequestDto
+                {
+                    Email = email,
+                    Password = password
+                });
+
+        var authResponse = await response.Content.ReadFromJsonAsync<AuthResponseDto>();
+        var handler = new JwtSecurityTokenHandler();
+
+        // Act
+        var jwt = handler.ReadJwtToken(authResponse!.Token);
+
+        // Assert
+        Assert.Contains(jwt.Claims, c => c.Type == JwtRegisteredClaimNames.Email && c.Value == email);
+        Assert.Contains(jwt.Claims, c => c.Type == JwtRegisteredClaimNames.Sub);
+
+        Assert.True(jwt.ValidTo > DateTime.UtcNow);
+    }
+
+    #endregion
 }

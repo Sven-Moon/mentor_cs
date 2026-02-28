@@ -3,7 +3,6 @@ using MentoringApp.Api.DTOs;
 using MentoringApp.Api.DTOs.Auth;
 using MentoringApp.Api.DTOs.Mentorship;
 using MentoringApp.Api.Identity;
-using MentoringApp.Api.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -20,8 +19,8 @@ public class AdminController : ControllerBase
     private readonly UserManager<ApplicationUser> _userManager;
 
     public AdminController(
-        ApplicationDbContext context, 
-        UserManager<ApplicationUser> userManager)
+            ApplicationDbContext context,
+            UserManager<ApplicationUser> userManager)
     {
         _context = context;
         _userManager = userManager;
@@ -33,9 +32,9 @@ public class AdminController : ControllerBase
     public async Task<IActionResult> GetAllUsers()
     {
         var users = await _userManager.Users
-            .Include(u => u.Profile)
-            .AsNoTracking()
-            .ToListAsync();
+                .Include(u => u.Profile)
+                .AsNoTracking()
+                .ToListAsync();
 
         var result = new List<AdminUserDto>();
 
@@ -60,10 +59,10 @@ public class AdminController : ControllerBase
     }
 
     [HttpDelete("users/{userId}")]
-    public async Task<IActionResult>DeleteUser(string userId)
+    public async Task<IActionResult> DeleteUser(string userId)
     {
         var user = await _userManager.FindByIdAsync(userId);
-        
+
         if (user == null) return NotFound();
 
         var result = await _userManager.DeleteAsync(user);
@@ -79,10 +78,10 @@ public class AdminController : ControllerBase
     public async Task<IActionResult> GetAllmentorships()
     {
         var mentorships = await _context.Mentorships
-            .Include(m => m.Mentor)
-            .Include(m => m.Mentee)
-            .AsNoTracking()
-            .ToListAsync();
+                .Include(m => m.Mentor)
+                .Include(m => m.Mentee)
+                .AsNoTracking()
+                .ToListAsync();
 
         return Ok(mentorships.Select(m => new
         {
@@ -99,9 +98,9 @@ public class AdminController : ControllerBase
     public async Task<IActionResult> UpdateMentorshipStatus(int id, [FromBody] UpdateMentorshipDto dto)
     {
         var mentorship = await _context.Mentorships
-            .FirstOrDefaultAsync(m => m.Id == id);
+                .FirstOrDefaultAsync(m => m.Id == id);
 
-        if (mentorship == null) 
+        if (mentorship == null)
             return NotFound();
 
         // Apply updates conditionally
@@ -133,8 +132,8 @@ public class AdminController : ControllerBase
     public async Task<IActionResult> GetAllSkills()
     {
         var skills = await _context.Skills
-            .AsNoTracking()
-            .ToListAsync();
+                .AsNoTracking()
+                .ToListAsync();
 
         return Ok(skills);
     }
@@ -143,7 +142,7 @@ public class AdminController : ControllerBase
     public async Task<IActionResult> UpdateSkill(int id, [FromBody] SkillDto updatedSkill)
     {
         var skill = await _context.Skills.FindAsync(id);
-        if (skill == null) 
+        if (skill == null)
             return NotFound();
 
         skill.Name = updatedSkill.Name;
@@ -156,7 +155,7 @@ public class AdminController : ControllerBase
     public async Task<IActionResult> DeleteSkill(int id)
     {
         var skill = await _context.Skills.FindAsync(id);
-        if (skill == null) 
+        if (skill == null)
             return NotFound();
 
         _context.Skills.Remove(skill);

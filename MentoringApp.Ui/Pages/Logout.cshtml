@@ -2,13 +2,13 @@
 @model MentoringApp.Ui.Pages.LogoutModel
 
 <div class="text-center mt-5">
-    @if (!string.IsNullOrEmpty(Model.Message))
-    {
-        <div class="alert alert-success" role="alert">
-            @Model.Message
-        </div>
-        <p>
-            <a class="btn btn-primary" asp-page="/Login">Go to Login</a>
-        </p>
-    }
+	@if (!string.IsNullOrEmpty(Model.Message))
+	{
+		<div class="alert alert-success" role="alert">
+			@Model.Message
+		</div>
+		<p>
+			<a class="btn btn-primary" asp-page="/Login">Go to Login</a>
+		</p>
+	}
 </div>

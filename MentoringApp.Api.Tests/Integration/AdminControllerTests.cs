@@ -29,14 +29,14 @@ public class AdminControllerTests
         var userManager = scope.ServiceProvider
         .GetRequiredService<UserManager<ApplicationUser>>();
         var roleManager = scope.ServiceProvider
-            .GetRequiredService<RoleManager<IdentityRole>>();
+                .GetRequiredService<RoleManager<IdentityRole>>();
 
         // Ensure the database is created and seeded
         db.Database.EnsureDeleted();
         db.Database.EnsureCreated();
         TestDbSeeder.SeedAsync(db, userManager, roleManager)
-            .GetAwaiter()
-            .GetResult();
+                .GetAwaiter()
+                .GetResult();
     }
 
 
@@ -54,7 +54,7 @@ public class AdminControllerTests
         .ReadFromJsonAsync<List<object>>();
 
 
-        Assert.NotNull(mentorships); 
+        Assert.NotNull(mentorships);
         Assert.NotEmpty(mentorships);
         Assert.True(mentorships.Count >= 2);
     }

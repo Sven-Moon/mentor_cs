@@ -19,18 +19,18 @@ namespace MentoringApp.Api.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
 
         public MentorshipsController(
-            ApplicationDbContext context, 
-            UserManager<ApplicationUser> userManager)
+                ApplicationDbContext context,
+                UserManager<ApplicationUser> userManager)
         {
             _db = context;
             _userManager = userManager;
         }
 
         private string UserId =>
-            User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+                User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
         private bool IsAdmin =>
-            User.IsInRole("Admin");
+                User.IsInRole("Admin");
 
         /// <summary>
         /// Get mentorships for the current user (mentor or mentee).
@@ -40,8 +40,8 @@ namespace MentoringApp.Api.Controllers
         public async Task<ActionResult<IEnumerable<MentorshipDto>>> GetMentorships()
         {
             IQueryable<Mentorship> query = _db.Mentorships
-                .Include(m => m.Mentor)
-                .Include(m => m.Mentee);
+                    .Include(m => m.Mentor)
+                    .Include(m => m.Mentee);
 
             if (!IsAdmin)
             {
@@ -56,20 +56,20 @@ namespace MentoringApp.Api.Controllers
         /// <summary>
         /// Get a single mentorship by ID.
         /// </summary>
-        [HttpGet("{id:int}")] 
+        [HttpGet("{id:int}")]
         public async Task<ActionResult<MentorshipDto>> GetMentorship(int id) // why not IActionResult??
         {
             var mentorship = await _db.Mentorships
-                .Include(m => m.Mentor)
-                .Include(m => m.Mentee)
-                .FirstOrDefaultAsync(m => m.Id == id);
+                    .Include(m => m.Mentor)
+                    .Include(m => m.Mentee)
+                    .FirstOrDefaultAsync(m => m.Id == id);
 
             if (mentorship == null)
                 return NotFound();
 
             if (!IsAdmin &&
-                mentorship.MentorId != UserId &&
-                mentorship.MenteeId != UserId)
+                    mentorship.MentorId != UserId &&
+                    mentorship.MenteeId != UserId)
             {
                 return Forbid();
             }
@@ -84,7 +84,7 @@ namespace MentoringApp.Api.Controllers
         [HttpPost]
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult<MentorshipDto>> CreateMentorship(
-            [FromBody] MentorshipDto dto)
+                [FromBody] MentorshipDto dto)
         {
             var entity = new Mentorship
             {
@@ -105,9 +105,9 @@ namespace MentoringApp.Api.Controllers
             dto.Id = entity.Id;
 
             return CreatedAtAction(
-                nameof(GetMentorship), // action name
-                new { id = entity.Id }, // routeValues
-                dto); // route
+                    nameof(GetMentorship), // action name
+                    new { id = entity.Id }, // routeValues
+                    dto); // route
         }
 
         /// <summary>
@@ -116,21 +116,21 @@ namespace MentoringApp.Api.Controllers
         /// </summary>
         [HttpPut("{id:int}")]
         public async Task<IActionResult> UpdateMentorship(
-            int id,
-            [FromBody] MentorshipDto updated)
+                int id,
+                [FromBody] MentorshipDto updated)
         {
             if (id != updated.Id)
                 return BadRequest();
 
             var mentorship = await _db.Mentorships
-                .FirstOrDefaultAsync(m => m.Id == id);
+                    .FirstOrDefaultAsync(m => m.Id == id);
 
             if (mentorship == null)
                 return NotFound();
 
             if (!IsAdmin &&
-                mentorship.MentorId != UserId &&
-                mentorship.MenteeId != UserId)
+                    mentorship.MentorId != UserId &&
+                    mentorship.MenteeId != UserId)
             {
                 Forbid();
             }
@@ -145,8 +145,8 @@ namespace MentoringApp.Api.Controllers
             if (_db.Database.IsNpgsql())
             {
                 _db.Entry(mentorship)
-                    .Property("xmin")
-                    .OriginalValue = BitConverter.ToUInt32(updated.Version);
+                        .Property("xmin")
+                        .OriginalValue = BitConverter.ToUInt32(updated.Version);
             }
 
             // TODO: Add automatic retry / merge strategies

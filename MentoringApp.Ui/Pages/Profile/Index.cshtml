@@ -5,24 +5,24 @@
 
 <div class="profile-container">
 
-  @await Html.PartialAsync("_EditableField",
-  (nameof(Model.Profile.FirstName), "First Name", Model.Profile.FirstName))
+	@await Html.PartialAsync("_EditableField",
+	(nameof(Model.Profile.FirstName), "First Name", Model.Profile.FirstName))
 
-  @await Html.PartialAsync("_EditableField",
-    (nameof(Model.Profile.LastName), "Last Name", Model.Profile.LastName))
+	@await Html.PartialAsync("_EditableField",
+		(nameof(Model.Profile.LastName), "Last Name", Model.Profile.LastName))
 
-  @await Html.PartialAsync("_EditableField",
-    (nameof(Model.Profile.Bio), "Bio", Model.Profile.Bio))
+	@await Html.PartialAsync("_EditableField",
+		(nameof(Model.Profile.Bio), "Bio", Model.Profile.Bio))
 
-  @await Html.PartialAsync("_EditableField",
-    (nameof(Model.Profile.Location), "Location", Model.Profile.Location))
+	@await Html.PartialAsync("_EditableField",
+		(nameof(Model.Profile.Location), "Location", Model.Profile.Location)) // TODO does not update!!
 
 </div>
 
 @section Scripts {
-  <script>
-    function cancelEdit() {
-        window.location.reload();
-    }
-  </script>
+	<script>
+		function cancelEdit() {
+				window.location.reload();
+		}
+	</script>
 }
