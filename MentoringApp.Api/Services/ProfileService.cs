@@ -1,7 +1,7 @@
-﻿using MentoringApp.Api.Data;
+﻿using AutoMapper;
+using MentoringApp.Api.Data;
 using MentoringApp.Api.DTOs.Profiles;
 using MentoringApp.Api.Identity;
-using MentoringApp.Api.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace MentoringApp.Api.Services
@@ -17,12 +17,12 @@ namespace MentoringApp.Api.Services
 			_mapper = mapper;
 		}
 
-		public async Task<Profile> CreateDefaultProfileAsync(ApplicationUser user)
+		public async Task<Models.Profile> CreateDefaultProfileAsync(ApplicationUser user)
 		{
 			if (user == null)
 				throw new ArgumentNullException(nameof(user), "User cannot be null.");
 
-			var profile = new Profile
+			var profile = new Models.Profile
 			{
 				CreatedAt = DateTime.UtcNow,
 				UserId = user.Id,
@@ -34,7 +34,7 @@ namespace MentoringApp.Api.Services
 			return profile;
 		}
 
-		public async Task<Profile?> GetByUserIdAsync(string userId)
+		public async Task<Models.Profile?> GetByUserIdAsync(string userId)
 		{
 			if (string.IsNullOrEmpty(userId))
 				throw new ArgumentException("User ID cannot be null or empty.", nameof(userId));
@@ -44,12 +44,12 @@ namespace MentoringApp.Api.Services
 							.FirstOrDefaultAsync(p => p.UserId == userId);
 		}
 
-		public async Task<Profile?> GetByIdAsync(int id)
+		public async Task<Models.Profile?> GetByIdAsync(int id)
 		{
 			if (id <= 0)
 				throw new ArgumentException("Profile ID must be a positive integer.", nameof(id));
 
-			Profile? profile = await _db.Profiles
+			Models.Profile? profile = await _db.Profiles
 							.FirstOrDefaultAsync(p => p.Id == id);
 
 			if (profile == null)
@@ -60,7 +60,7 @@ namespace MentoringApp.Api.Services
 			return profile;
 		}
 
-		public async Task<Profile> CreateAsync(Profile profile)
+		public async Task<Models.Profile> CreateAsync(Models.Profile profile)
 		{
 			if (profile == null)
 				throw new ArgumentNullException(nameof(profile), "Profile cannot be null.");
