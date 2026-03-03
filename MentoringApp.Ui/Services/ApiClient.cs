@@ -50,11 +50,11 @@ namespace MentoringApp.Ui.Services
         {
             await PostJsonAsync("/api/profile", dto);
         }
-        #endregion profile
+		#endregion profile
 
-        #region Helpers
+		#region Helpers
 
-        private async Task<T> GetJsonAsync<T>(string url)
+		private async Task<T> GetJsonAsync<T>(string url)
         {
             var response = await SendAsync(HttpMethod.Get, url);
             await EnsureSuccess(response);
