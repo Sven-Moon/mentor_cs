@@ -1,4 +1,6 @@
-﻿namespace MentoringApp.Api.Models
+﻿using MentoringApp.Api.Enums;
+
+namespace MentoringApp.Api.Models
 {
 	public class Skill
 	{
@@ -7,8 +9,14 @@
 		// Properties
 		public required string Name { get; set; } // e.g., "C#", "JavaScript", "Project Management"
 		public required string Description { get; set; } // Optional description of the skill
+		public SkillStatus Status { get; set; } = SkillStatus.Pending; // Default to Pending
+		public int? DuplicateOfSkillId { get; set; } //Can this not be done programatically outside of the model?
 
-		// Navigation property for many-to-many relationship with Profile
+		// Foreign key relationship for duplicate skill reference
+		public Skill? DuplicateOfSkill { get; set; }
+
+		// Navigation properties for many-to-many relationships
 		public virtual ICollection<UserSkill> UserSkills { get; set; } = new List<UserSkill>();
+		public virtual ICollection<SkillTag> SkillTags { get; set; } = new List<SkillTag>();
 	}
 }
