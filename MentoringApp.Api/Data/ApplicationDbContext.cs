@@ -12,6 +12,8 @@ namespace MentoringApp.Api.Data
 		public DbSet<Profile> Profiles { get; set; }
 		public DbSet<Skill> Skills { get; set; }
 		public DbSet<UserSkill> UserSkills { get; set; }
+		public DbSet<Tag> Tags { get; set; }
+		public DbSet<SkillTag> SkillTags { get; set; }
 		public DbSet<Mentorship> Mentorships { get; set; }
 		public DbSet<Testimonial> Testimonials { get; set; }
 		public DbSet<RefreshToken> RefreshTokens { get; set; }
@@ -28,9 +30,9 @@ namespace MentoringApp.Api.Data
 				entity.HasKey(p => p.Id);
 
 				entity.HasOne(p => p.User)
-													.WithOne(u => u.Profile)
-													.HasForeignKey<Profile>(p => p.UserId)
-													.OnDelete(DeleteBehavior.Cascade); // disable only
+					.WithOne(u => u.Profile)
+					.HasForeignKey<Profile>(p => p.UserId)
+					.OnDelete(DeleteBehavior.Cascade); // disable only
 			});
 
 			// -------------------------------------
@@ -41,8 +43,52 @@ namespace MentoringApp.Api.Data
 				entity.HasKey(s => s.Id);
 
 				entity.Property(s => s.Name)
-													.IsRequired()
-													.HasMaxLength(150);
+					.IsRequired()
+					.HasMaxLength(150);
+
+				entity.HasIndex(s => s.Name)
+					.IsUnique();
+
+				entity.Property(s => s.Status)
+					.HasConversion<int>();
+
+				entity.HasOne(s => s.DuplicateOfSkill)
+					.WithMany()
+					.HasForeignKey(s => s.DuplicateOfSkillId)
+					.OnDelete(DeleteBehavior.Restrict);
+			});
+
+			// -------------------------------------
+			// TAGS
+			// -------------------------------------
+			modelBuilder.Entity<Tag>(entity =>
+			{
+				entity.HasKey(t => t.Id);
+
+				entity.Property(t => t.Name)
+					.IsRequired()
+					.HasMaxLength(50);
+
+				entity.HasIndex(t => t.Name)
+					.IsUnique();
+
+			});
+
+			// -------------------------------------
+			// SKILL TAGS (many-to-many)
+			// -------------------------------------
+			modelBuilder.Entity<SkillTag>(entity =>
+			{
+				entity.HasKey(st => new { st.SkillId, st.TagId});
+
+				entity.HasOne(st => st.Skill)
+					.WithMany(s => s.SkillTags)
+					.HasForeignKey(st => st.SkillId)
+					.OnDelete(DeleteBehavior.Cascade);
+				entity.HasOne(st => st.Tag)
+					.WithMany(t => t.SkillTags)
+					.HasForeignKey(st => st.TagId)
+					.OnDelete(DeleteBehavior.Cascade);
 			});
 
 			// -------------------------------------
@@ -53,14 +99,14 @@ namespace MentoringApp.Api.Data
 				entity.HasKey(us => us.Id);
 
 				entity.HasOne(us => us.User)
-													.WithMany(u => u.UserSkills)
-													.HasForeignKey(us => us.UserId)
-													.OnDelete(DeleteBehavior.Restrict);
+					.WithMany(u => u.UserSkills)
+					.HasForeignKey(us => us.UserId)
+					.OnDelete(DeleteBehavior.Restrict);
 
 				entity.HasOne(us => us.Skill)
-													.WithMany(s => s.UserSkills)
-													.HasForeignKey(us => us.SkillId)
-													.OnDelete(DeleteBehavior.Cascade);
+					.WithMany(s => s.UserSkills)
+					.HasForeignKey(us => us.SkillId)
+					.OnDelete(DeleteBehavior.Cascade);
 			});
 
 			// -------------------------------------
@@ -71,22 +117,22 @@ namespace MentoringApp.Api.Data
 				entity.HasKey(m => m.Id);
 
 				entity.HasOne(m => m.Mentor)
-													.WithMany(u => u.MentorshipsAsMentor)
-													.HasForeignKey(m => m.MentorId)
-													.OnDelete(DeleteBehavior.Restrict);
+					.WithMany(u => u.MentorshipsAsMentor)
+					.HasForeignKey(m => m.MentorId)
+					.OnDelete(DeleteBehavior.Restrict);
 
 				entity.HasOne(m => m.Mentee)
-													.WithMany(u => u.MentorshipAsMentee)
-													.HasForeignKey(m => m.MenteeId)
-													.OnDelete(DeleteBehavior.Restrict);
+					.WithMany(u => u.MentorshipAsMentee)
+					.HasForeignKey(m => m.MenteeId)
+					.OnDelete(DeleteBehavior.Restrict);
 
 				// concurrency -- not included in sqlite test db
 				if (Database.IsNpgsql())
 				{
 					entity.Property<uint>("xmin")
-																		.HasColumnName("xmin")
-																		.HasColumnType("xid")
-																		.IsRowVersion();
+						.HasColumnName("xmin")
+						.HasColumnType("xid")
+						.IsRowVersion();
 				}
 			});
 
@@ -98,19 +144,19 @@ namespace MentoringApp.Api.Data
 				entity.HasKey(t => t.Id);
 
 				entity.HasOne(t => t.Recipient)
-													.WithMany(u => u.ReceivedTestimonials)
-													.HasForeignKey(t => t.RecipientId)
-													.OnDelete(DeleteBehavior.Restrict);
+					.WithMany(u => u.ReceivedTestimonials)
+					.HasForeignKey(t => t.RecipientId)
+					.OnDelete(DeleteBehavior.Restrict);
 
 				entity.HasOne(t => t.Author)
-													.WithMany(u => u.WrittenTestimonials)
-													.HasForeignKey(t => t.AuthorId)
-													.OnDelete(DeleteBehavior.Restrict);
+					.WithMany(u => u.WrittenTestimonials)
+					.HasForeignKey(t => t.AuthorId)
+					.OnDelete(DeleteBehavior.Restrict);
 
 				entity.HasOne(t => t.Mentorship)
-													.WithMany(m => m.Testimonials)
-													.HasForeignKey(t => t.MentorshipId)
-													.OnDelete(DeleteBehavior.Cascade);
+					.WithMany(m => m.Testimonials)
+					.HasForeignKey(t => t.MentorshipId)
+					.OnDelete(DeleteBehavior.Cascade);
 			});
 
 			// RefreshToken basic mapping (optional)
