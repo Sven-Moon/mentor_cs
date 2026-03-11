@@ -1,7 +1,7 @@
 using MentoringApp.Api.Data;
-using MentoringApp.Api.DTOs;
 using MentoringApp.Api.DTOs.Auth;
 using MentoringApp.Api.DTOs.Mentorship;
+using MentoringApp.Api.DTOs.Skills;
 using MentoringApp.Api.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
