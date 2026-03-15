@@ -21,6 +21,7 @@ namespace MentoringApp.Api.Services
 			var existingSkill = await _db.Skills
 				.FirstOrDefaultAsync(s => s.Name.ToLower() == dto.Name.ToLower());
 
+			#region Validation
 			if (existingSkill != null)
 			{
 				throw new InvalidOperationException("A skill with the same name already exists.");
@@ -32,6 +33,7 @@ namespace MentoringApp.Api.Services
 			{
 				throw new InvalidOperationException("You have reached the limit of 10 pending skills. Please wait for them to be reviewed before adding more.");
 			}
+			#endregion
 
 			// Create new skill
 			var skill = new Skill
@@ -41,25 +43,32 @@ namespace MentoringApp.Api.Services
 				Status = SkillStatus.Pending
 			};
 
-			_db.Skills.Add(skill);
-			await _db.SaveChangesAsync();
+			#region Add categories
+			if (dto.CategoryIds.Any())
+			{
+				var categories = await _db.SkillCategories
+					.Where(c => dto.CategoryIds.Contains(c.Id))
+					.ToListAsync();
 
-			// Add tags
+				foreach (var category in categories)
+					skill.Categories.Add(category);
+				
+			}
+			#endregion
+
+			#region Add tags
 			if (dto.Tags.Any())
 			{
 				var tags = await GetOrCreateTagsAsync(dto.Tags);
 				foreach (var tag in tags)
-				{
-					var skillTag = new SkillTag
-					{
-						SkillId = skill.Id,
-						TagId = tag.Id
-					};
-
-					_db.SkillTags.Add(skillTag);
-				}
-				await _db.SaveChangesAsync();
+					skill.Tags.Add(tag);
 			}
+			#endregion
+
+			_db.Skills.Add(skill);
+
+			await _db.SaveChangesAsync();
+
 			return skill;
 		}
 
@@ -67,28 +76,28 @@ namespace MentoringApp.Api.Services
 		{
 			return await _db.Skills.CountAsync(s => s.Status == SkillStatus.Pending);
 		}
-		
+
 		public async Task<Skill?> GetSkillByNameAsync(string name)
 		{
 			return await _db.Skills
-				.Include(s => s.SkillTags)
-				.ThenInclude(st => st.Tag)
+				.Include(s => s.Tags)
+				.Include(s => s.Categories)
 				.FirstOrDefaultAsync(s => s.Name.ToLower() == name.ToLower());
 		}
-		
+
 		public async Task<Skill?> GetSkillByIdAsync(int id)
 		{
 			return await _db.Skills
-				.Include(s => s.SkillTags)
-				.ThenInclude(st => st.Tag)
+				.Include(s => s.Tags)
+				.Include(s => s.Categories)
 				.FirstOrDefaultAsync(s => s.Id == id);
 		}
-		
+
 		public async Task<List<Skill>> GetAllSkillsAsync(bool includeApprovedOnly = false)
 		{
 			var query = _db.Skills
-				.Include(s => s.SkillTags)
-				.ThenInclude(st => st.Tag)
+				.Include(s => s.Tags)
+				.Include(s => s.Categories)
 				.AsQueryable();
 
 			if (includeApprovedOnly)
@@ -98,7 +107,7 @@ namespace MentoringApp.Api.Services
 
 			return await query.ToListAsync();
 		}
-		
+
 		public async Task ApproveSkillAsync(int skillId)
 		{
 			var skill = await _db.Skills.FindAsync(skillId);
@@ -111,11 +120,11 @@ namespace MentoringApp.Api.Services
 
 			await _db.SaveChangesAsync();
 		}
-		
+
 		public async Task ApproveSkillWithEditsAsync(int skillId, SkillModerationDto dto)
 		{
 			var skill = await _db.Skills
-				.Include(s => s.SkillTags)
+				.Include(s => s.Tags)
 				.FirstOrDefaultAsync(s => s.Id == skillId);
 
 			if (skill == null)
@@ -129,19 +138,13 @@ namespace MentoringApp.Api.Services
 			skill.Status = SkillStatus.Approved;
 
 			// update tags
-			_db.SkillTags.RemoveRange(skill.SkillTags);
+			skill.Tags.Clear();
 			if (dto.Tags.Any())
 			{
 				var tags = await GetOrCreateTagsAsync(dto.Tags);
 				foreach (var tag in tags)
 				{
-					var skillTag = new SkillTag
-					{
-						SkillId = skill.Id,
-						TagId = tag.Id
-					};
-
-					_db.SkillTags.Add(skillTag);
+					skill.Tags.Add(tag);
 				}
 			}
 
@@ -151,7 +154,7 @@ namespace MentoringApp.Api.Services
 		public async Task RejectSkillAsync(int skillId)
 		{
 			var skill = await _db.Skills
-				.Include(s => s.SkillTags)
+				.Include(s => s.UserSkills)
 				.FirstOrDefaultAsync(s => s.Id == skillId);
 
 			if (skill == null)
@@ -165,7 +168,7 @@ namespace MentoringApp.Api.Services
 
 			await _db.SaveChangesAsync();
 		}
-		
+
 		public async Task MarkSkillAsDuplicateAsync(int skillId, int existingSkillId)
 		{
 			var duplicateSkill = await _db.Skills
@@ -204,23 +207,26 @@ namespace MentoringApp.Api.Services
 
 		public async Task<List<Tag>> GetOrCreateTagsAsync(List<string> tagNames)
 		{
-			var tags = new List<Tag>();
+			var normalized = tagNames
+				.Select(t => t.Trim().ToLower()).ToList()
+				.Distinct()
+				.ToList();
 
-			foreach (var tagName in tagNames.Distinct())
-			{
-				var normalizedName = tagName.Trim().ToLower();
-				var tag = await _db.Tags.FirstOrDefaultAsync(t => t.Name.ToLower() == normalizedName);
+			var existing = await _db.Tags
+				.Where(t => normalized.Contains(t.Name.ToLower()))
+				.ToListAsync();
 
-				if (tag == null)
-				{
-					tag = new Tag { Name = normalizedName };
-					_db.Tags.Add(tag);
+			var newTags = normalized
+				.Where(n => existing.All(e => e.Name.ToLower() != n))
+				.Select(n => new Tag { Name = n })
+				.ToList();
 
-					await _db.SaveChangesAsync(); // Save to get the ID for the new tag
-				}
-				tags.Add(tag);
-			}
-			return tags;
+			if (newTags.Any())
+				_db.Tags.AddRange(newTags);
+
+			await _db.SaveChangesAsync();
+
+			return existing.Concat(newTags).ToList();
 		}
 	}
 }

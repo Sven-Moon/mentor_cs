@@ -8,6 +8,6 @@
 		public required string Name { get; set; } // e.g., "backend", "frontend", "devops", "soft skills"
 
 		// Navigation properties for many-to-many relationships
-		public virtual ICollection<SkillTag> SkillTags { get; set; } = new List<SkillTag>();
+		public virtual ICollection<Skill> Skills { get; set; } = new List<Skill>();
 	}
 }

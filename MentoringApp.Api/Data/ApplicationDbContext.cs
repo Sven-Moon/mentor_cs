@@ -12,8 +12,8 @@ namespace MentoringApp.Api.Data
 		public DbSet<Profile> Profiles { get; set; }
 		public DbSet<Skill> Skills { get; set; }
 		public DbSet<UserSkill> UserSkills { get; set; }
+		public DbSet<SkillCategory> SkillCategories { get; set; }
 		public DbSet<Tag> Tags { get; set; }
-		public DbSet<SkillTag> SkillTags { get; set; }
 		public DbSet<Mentorship> Mentorships { get; set; }
 		public DbSet<Testimonial> Testimonials { get; set; }
 		public DbSet<RefreshToken> RefreshTokens { get; set; }
@@ -59,6 +59,26 @@ namespace MentoringApp.Api.Data
 			});
 
 			// -------------------------------------
+			// SKILL CATEGORIES
+			// -------------------------------------
+			modelBuilder.Entity<SkillCategory>(entity =>
+			{
+				entity.HasKey(c => c.Id);
+
+				entity.Property(c => c.Name)
+				.IsRequired()
+				.HasMaxLength(100);
+
+				entity.HasIndex(c => c.Name)
+					.IsUnique();
+			});
+
+			modelBuilder.Entity<Skill>()
+				.HasMany(s => s.Categories)
+				.WithMany(c => c.Skills)
+				.UsingEntity(j => j.ToTable("SkillCategories"));
+
+			// -------------------------------------
 			// TAGS
 			// -------------------------------------
 			modelBuilder.Entity<Tag>(entity =>
@@ -72,23 +92,6 @@ namespace MentoringApp.Api.Data
 				entity.HasIndex(t => t.Name)
 					.IsUnique();
 
-			});
-
-			// -------------------------------------
-			// SKILL TAGS (many-to-many)
-			// -------------------------------------
-			modelBuilder.Entity<SkillTag>(entity =>
-			{
-				entity.HasKey(st => new { st.SkillId, st.TagId});
-
-				entity.HasOne(st => st.Skill)
-					.WithMany(s => s.SkillTags)
-					.HasForeignKey(st => st.SkillId)
-					.OnDelete(DeleteBehavior.Cascade);
-				entity.HasOne(st => st.Tag)
-					.WithMany(t => t.SkillTags)
-					.HasForeignKey(st => st.TagId)
-					.OnDelete(DeleteBehavior.Cascade);
 			});
 
 			// -------------------------------------

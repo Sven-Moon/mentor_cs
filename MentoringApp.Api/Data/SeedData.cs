@@ -1,5 +1,6 @@
 using MentoringApp.Api.Identity;
 using MentoringApp.Api.Models;
+using MentoringApp.Api.Enums;
 
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -27,6 +28,7 @@ namespace MentoringApp.Api.Data
 			await SeedRoles(roleManager);
 			var adminUser = await SeedAdminUser(userManager);
 			var regularUser = await SeedRegularUser(userManager);
+			await SeedSkillCategories(context);
 			await SeedSkills(context);
 			await SeedSampleProfiles(context, adminUser);
 			await SeedSampleMentorships(context, adminUser, regularUser);
@@ -91,16 +93,43 @@ namespace MentoringApp.Api.Data
 		{
 			if (context.Skills.Any()) return;
 
-			var skills = new List<Skill>
-						{
-								new Skill { Name = "C#", Description = "C# is a modern, object-oriented programming language developed by Microsoft." },
-								new Skill { Name = "JavaScript", Description = "JavaScript is a versatile programming language commonly used for web development." },
-								new Skill { Name = "SQL", Description = "SQL (Structured Query Language) is used for managing and manipulating relational databases." },
-								new Skill { Name = "Project Management", Description = "Project Management involves planning, executing, and closing projects." },
-								new Skill { Name = "Communication", Description = "Communication skills are essential for effective collaboration and information exchange." }
-						};
+			var categories = await context.SkillCategories.ToDictionaryAsync(c => c.Name);
 
-			context.Skills.AddRange(skills);
+			var csharp = new Skill
+			{
+				Name = "C#",
+				Description = "A versatile programming language used for backend development, game development, and more.",
+				Status = SkillStatus.Approved,
+				Categories = new List<SkillCategory> { categories["Backend"] }
+			};
+			var javascript = new Skill
+			{
+				Name = "JavaScript",
+				Description = "A popular programming language primarily used for frontend development to create interactive web pages.",
+				Status = SkillStatus.Approved,
+				Categories = new List<SkillCategory> { categories["Frontend"] }
+			};
+			var sql = new Skill
+			{
+				Name = "SQL",
+				Description = "A domain-specific language used for managing and querying relational databases.",
+				Status = SkillStatus.Approved,
+				Categories = new List<SkillCategory> { categories["Databases"] }
+			};
+			var communication = new Skill
+			{
+				Name = "Communication",
+				Description = "The ability to convey information effectively and efficiently.",
+				Status = SkillStatus.Approved,
+				Categories = new List<SkillCategory> { categories["Soft Skills"] }
+			};
+
+			context.Skills.AddRange(
+				csharp,
+				javascript,
+				sql,
+				communication);
+
 			await context.SaveChangesAsync();
 		}
 
@@ -136,6 +165,27 @@ namespace MentoringApp.Api.Data
 			};
 
 			context.Mentorships.Add(mentorship);
+			await context.SaveChangesAsync();
+		}
+
+		private static async Task SeedSkillCategories(ApplicationDbContext context)
+		{
+			if (context.SkillCategories.Any()) return;
+
+			var categories = new List<SkillCategory>
+			{
+				new SkillCategory { Name = "Backend", Description = "Server-side development" },
+				new SkillCategory { Name = "Frontend", Description = "User interface development" },
+				new SkillCategory { Name = "DevOps", Description = "Infrastructure and deployment" },
+				new SkillCategory { Name = "Databases", Description = "Database design and querying" },
+				new SkillCategory { Name = "Architecture", Description = "System design and architecture" },
+				new SkillCategory { Name = "Testing", Description = "Unit and integration testing" },
+				new SkillCategory { Name = "Security", Description = "Application security" },
+				new SkillCategory { Name = "Mobile", Description = "Mobile development" },
+				new SkillCategory { Name = "Soft Skills", Description = "Communication and leadership" }
+			};
+
+			context.SkillCategories.AddRange(categories);
 			await context.SaveChangesAsync();
 		}
 	}
