@@ -104,6 +104,9 @@ namespace MentoringApp.Api.Data
 			{
 				entity.HasKey(us => us.Id);
 
+				entity.HasIndex(us => new { us.UserId, us.SkillId })
+					.IsUnique();
+
 				entity.HasOne(us => us.User)
 					.WithMany(u => u.UserSkills)
 					.HasForeignKey(us => us.UserId)
@@ -113,6 +116,9 @@ namespace MentoringApp.Api.Data
 					.WithMany(s => s.UserSkills)
 					.HasForeignKey(us => us.SkillId)
 					.OnDelete(DeleteBehavior.Cascade);
+
+				entity.Property(us => us.Level)
+					.HasConversion<int>();
 			});
 
 			// -------------------------------------

@@ -1,4 +1,6 @@
-﻿namespace MentoringApp.Api.DTOs
+﻿using MentoringApp.Api.Enums;
+
+namespace MentoringApp.Api.DTOs.Skills
 {
 	public class UserSkillDto
 	{
@@ -9,7 +11,7 @@
 		public int SkillId { get; set; }
 
 		// properties
-		public int Level { get; set; } // Skill level (1-5)
+		public SkillLevel Level { get; set; } // Skill level (1-5)
 
 		// Navigation properties
 		public List<UserSkillDto> Users { get; set; } = new();

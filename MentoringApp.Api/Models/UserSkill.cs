@@ -1,4 +1,5 @@
 ﻿using MentoringApp.Api.Identity;
+using MentoringApp.Api.Enums;
 
 namespace MentoringApp.Api.Models
 {
@@ -11,7 +12,8 @@ namespace MentoringApp.Api.Models
 		public int SkillId { get; set; }
 
 		// properties
-		public int Level { get; set; } // Skill level (1-5)
+		public SkillLevel Level { get; set; } // Skill level (1-5)
+		public int? YearsExperience { get; set; } // Years of experience in this skill
 
 		// Navigation properties
 		public ApplicationUser User { get; set; } = default!;
