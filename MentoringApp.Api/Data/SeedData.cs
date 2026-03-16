@@ -98,6 +98,7 @@ namespace MentoringApp.Api.Data
 			var csharp = new Skill
 			{
 				Name = "C#",
+				NormalizedName = "C#",
 				Description = "A versatile programming language used for backend development, game development, and more.",
 				Status = SkillStatus.Approved,
 				Categories = new List<SkillCategory> { categories["Backend"] }
@@ -105,6 +106,7 @@ namespace MentoringApp.Api.Data
 			var javascript = new Skill
 			{
 				Name = "JavaScript",
+				NormalizedName = "JAVASCRIPT",
 				Description = "A popular programming language primarily used for frontend development to create interactive web pages.",
 				Status = SkillStatus.Approved,
 				Categories = new List<SkillCategory> { categories["Frontend"] }
@@ -112,6 +114,7 @@ namespace MentoringApp.Api.Data
 			var sql = new Skill
 			{
 				Name = "SQL",
+				NormalizedName = "SQL",
 				Description = "A domain-specific language used for managing and querying relational databases.",
 				Status = SkillStatus.Approved,
 				Categories = new List<SkillCategory> { categories["Databases"] }
@@ -119,6 +122,7 @@ namespace MentoringApp.Api.Data
 			var communication = new Skill
 			{
 				Name = "Communication",
+				NormalizedName = "COMMUNICATION",
 				Description = "The ability to convey information effectively and efficiently.",
 				Status = SkillStatus.Approved,
 				Categories = new List<SkillCategory> { categories["Soft Skills"] }

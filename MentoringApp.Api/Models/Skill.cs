@@ -8,6 +8,7 @@ namespace MentoringApp.Api.Models
 
 		// Properties
 		public required string Name { get; set; } // e.g., "C#", "JavaScript", "Project Management"
+		public required string NormalizedName { get; set; }
 		public required string Description { get; set; } // Optional description of the skill
 		public SkillStatus Status { get; set; } = SkillStatus.Pending; // Default to Pending
 		public int? DuplicateOfSkillId { get; set; } //Can this not be done programatically outside of the model?

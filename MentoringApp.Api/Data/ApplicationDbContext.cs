@@ -42,6 +42,9 @@ namespace MentoringApp.Api.Data
 			{
 				entity.HasKey(s => s.Id);
 
+				entity.HasIndex(s => s.NormalizedName)
+					.IsUnique();
+
 				entity.Property(s => s.Name)
 					.IsRequired()
 					.HasMaxLength(150);
@@ -76,7 +79,7 @@ namespace MentoringApp.Api.Data
 			modelBuilder.Entity<Skill>()
 				.HasMany(s => s.Categories)
 				.WithMany(c => c.Skills)
-				.UsingEntity(j => j.ToTable("SkillCategories"));
+				.UsingEntity(j => j.ToTable("SkillCategoryMappings"));
 
 			// -------------------------------------
 			// TAGS

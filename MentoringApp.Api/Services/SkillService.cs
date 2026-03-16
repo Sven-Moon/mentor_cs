@@ -17,9 +17,11 @@ namespace MentoringApp.Api.Services
 
 		public async Task<Skill> CreateSkillAsync(string userId, SkillCreateDto dto)
 		{
+			var normalizedName = dto.Name.Trim().ToUpperInvariant();
+
 			// Check if a skill with the same name already exists (case-insensitive)
 			var existingSkill = await _db.Skills
-				.FirstOrDefaultAsync(s => s.Name.ToLower() == dto.Name.ToLower());
+				.FirstOrDefaultAsync(s => s.NormalizedName == normalizedName);
 
 			#region Validation
 			if (existingSkill != null)
@@ -39,6 +41,7 @@ namespace MentoringApp.Api.Services
 			var skill = new Skill
 			{
 				Name = dto.Name,
+				NormalizedName = normalizedName,
 				Description = dto.Description,
 				Status = SkillStatus.Pending
 			};
