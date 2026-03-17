@@ -2,6 +2,7 @@ using MentoringApp.Api.Data;
 using MentoringApp.Api.Identity;
 using MentoringApp.Api.Mapping;
 using MentoringApp.Api.Services;
+using MentoringApp.Api.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -69,6 +70,8 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 builder.Services.AddScoped<IProfileService, ProfileService>();
+builder.Services.AddScoped<ISkillService, SkillService>();
+builder.Services.AddScoped<IUserSkillService, UserSkillService>();
 
 #endregion services
 

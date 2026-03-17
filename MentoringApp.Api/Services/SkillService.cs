@@ -2,11 +2,12 @@
 using MentoringApp.Api.DTOs.Skills;
 using MentoringApp.Api.Enums;
 using MentoringApp.Api.Models;
+using MentoringApp.Api.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace MentoringApp.Api.Services
 {
-	public class SkillService
+	public class SkillService : ISkillService
 	{
 		private readonly ApplicationDbContext _db;
 
