@@ -1,5 +1,392 @@
-﻿@page
+@page
 @model IndexModel
-<h1>Skills</h1>
+@using MentoringApp.Api.Enums
 @{
+		ViewData["Title"] = "Skills";
+
+		string LevelBadgeClass(SkillLevel level) => level switch
+		{
+				SkillLevel.Beginner    => "bg-secondary",
+				SkillLevel.Elementary  => "bg-info text-dark",
+				SkillLevel.Intermediate => "bg-warning text-dark",
+				SkillLevel.Advanced    => "bg-primary",
+				SkillLevel.Expert      => "bg-success",
+				_                      => "bg-secondary"
+		};
+}
+
+<h1 class="mb-4">Skills</h1>
+
+<!-- Sucess & Error Messages ->	
+@if (!string.IsNullOrEmpty(Model.SuccessMessage))
+{
+		<div class="alert alert-success alert-dismissible fade show" role="alert">
+				@Model.SuccessMessage
+				<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+		</div>
+}
+
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+		<div class="alert alert-danger alert-dismissible fade show" role="alert">
+				@Model.ErrorMessage
+				<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+		</div>
+}
+
+<!-- Tabs (buttons) -->
+<ul class="nav nav-tabs mb-4" id="skillsTabs" role="tablist">
+		<li class="nav-item" role="presentation">
+				<button class="nav-link" id="tab-mySkills"
+								data-bs-toggle="tab" data-bs-target="#mySkills" type="button" role="tab">
+						My Skills
+						@if (Model.MySkills.Any())
+						{
+								<span class="badge bg-primary ms-1">@Model.MySkills.Count</span>
+						}
+				</button>
+		</li>
+		<li class="nav-item" role="presentation">
+				<button class="nav-link" id="tab-browseSkills"
+								data-bs-toggle="tab" data-bs-target="#browseSkills" type="button" role="tab">
+						Browse &amp; Add
+				</button>
+		</li>
+		<li class="nav-item" role="presentation">
+				<button class="nav-link" id="tab-proposeSkill"
+								data-bs-toggle="tab" data-bs-target="#proposeSkill" type="button" role="tab">
+						Propose New Skill
+				</button>
+		</li>
+</ul>
+
+<div class="tab-content" id="skillsTabContent">
+
+		<!-- MY SKILLS TAB -->
+		<div class="tab-pane fade" id="mySkills" role="tabpanel">
+				@if (!Model.MySkills.Any())
+				{
+						<div class="text-center py-5 text-muted">
+								<p class="fs-5">You haven't added any skills yet.</p>
+								<button type="button" class="btn btn-primary"
+												onclick="showTab('browseSkills')">
+										Browse Available Skills
+								</button>
+						</div>
+				}
+				else
+				{
+						<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+								@foreach (var skill in Model.MySkills.OrderBy(s => s.SkillName))
+								{
+										<div class="col">
+												<div class="card h-100">
+														<div class="card-body">
+																<div class="d-flex justify-content-between align-items-start">
+																		<h5 class="card-title mb-1">@skill.SkillName</h5>
+																		<span class="badge @LevelBadgeClass(skill.Level) ms-2">@skill.Level</span>
+																</div>
+																@if (skill.YearsExperience.HasValue)
+																{
+																		<p class="card-text text-muted small mt-1">
+																				@skill.YearsExperience year@(skill.YearsExperience == 1 ? "" : "s") experience
+																		</p>
+																}
+														</div>
+														<div class="card-footer d-flex gap-2">
+																<button type="button" class="btn btn-outline-secondary btn-sm"
+																				onclick="openEditModal(@skill.SkillId, '@Html.Raw(skill.SkillName.Replace("'", "\\'"))', @((int)skill.Level), @(skill.YearsExperience.HasValue ? skill.YearsExperience.ToString() : "null"))">
+																		Edit
+																</button>
+																<form method="post" asp-page-handler="RemoveSkill" class="d-inline">
+																		<input type="hidden" name="skillId" value="@skill.SkillId" />
+																		<button type="submit" class="btn btn-outline-danger btn-sm"
+																						onclick="return confirm('Remove this skill from your profile?')">
+																				Remove
+																		</button>
+																</form>
+														</div>
+												</div>
+										</div>
+								}
+						</div>
+				}
+		</div>
+
+		<!-- BROWSE & ADD TAB -->
+		<div class="tab-pane fade" id="browseSkills" role="tabpanel">
+				<div class="row g-3 mb-4">
+						<div class="col-md-6">
+								<input type="text" id="skillSearch" class="form-control"
+											 placeholder="Search by name or tag..." />
+						</div>
+						@if (Model.Categories.Any())
+						{
+								<div class="col-md-4">
+										<select id="categoryFilter" class="form-select">
+												<option value="">All categories</option>
+												@foreach (var cat in Model.Categories)
+												{
+														<option value="@cat.Name.ToLower()">@cat.Name</option>
+												}
+										</select>
+								</div>
+						}
+				</div>
+
+				@{
+						var mySkillIds = Model.MySkills.Select(s => s.SkillId).ToHashSet();
+				}
+				@if (!Model.ApprovedSkills.Any())
+				{
+						<p class="text-muted">No approved skills available yet.</p>
+				}
+				else
+				{
+						<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3" id="skillCards">
+								@foreach (var skill in Model.ApprovedSkills.OrderBy(s => s.Name))
+								{
+										var alreadyAdded = mySkillIds.Contains(skill.Id);
+										<div class="col skill-card"
+												 data-name="@skill.Name.ToLower()"
+												 data-categories="@string.Join(" ", skill.Categories.Select(c => c.ToLower()))"
+												 data-tags="@string.Join(" ", skill.Tags.Select(t => t.ToLower()))">
+												<div class="card h-100 @(alreadyAdded ? "border-success" : "")">
+														<div class="card-body">
+																<div class="d-flex justify-content-between align-items-start">
+																		<h6 class="card-title mb-1">@skill.Name</h6>
+																		@if (alreadyAdded)
+																		{
+																				<span class="badge bg-success ms-2 small">In profile</span>
+																		}
+																</div>
+																@if (!string.IsNullOrEmpty(skill.Description))
+																{
+																		<p class="card-text small text-muted mb-2">
+																				@(skill.Description.Length > 90 ? skill.Description[..90] + "…" : skill.Description)
+																		</p>
+																}
+																@if (skill.Categories.Any())
+																{
+																		<div class="mb-1">
+																				@foreach (var cat in skill.Categories)
+																				{
+																						<span class="badge bg-light text-dark border me-1 small">@cat</span>
+																				}
+																		</div>
+																}
+																@if (skill.Tags.Any())
+																{
+																		<div>
+																				@foreach (var tag in skill.Tags)
+																				{
+																						<span class="badge bg-secondary me-1 small">@tag</span>
+																				}
+																		</div>
+																}
+														</div>
+														@if (!alreadyAdded)
+														{
+																<div class="card-footer">
+																		<button type="button" class="btn btn-primary btn-sm w-100"
+																						onclick="openAddModal(@skill.Id, '@Html.Raw(skill.Name.Replace("'", "\\'"))')">
+																				+ Add to Profile
+																		</button>
+																</div>
+														}
+												</div>
+										</div>
+								}
+						</div>
+						<p id="noResultsMsg" class="text-muted mt-3" style="display:none">
+								No skills match your search. Can't find what you need?
+								<button type="button" class="btn btn-link p-0 align-baseline"
+												onclick="showTab('proposeSkill')">Propose a new skill</button>
+						</p>
+				}
+		</div>
+
+		<!-- PROPOSE NEW SKILL TAB -->
+		<div class="tab-pane fade" id="proposeSkill" role="tabpanel">
+				<div class="row justify-content-center">
+						<div class="col-md-8 col-lg-6">
+								<div class="card">
+										<div class="card-header">
+												<h5 class="mb-0">Propose a New Skill</h5>
+										</div>
+										<div class="card-body">
+												<p class="text-muted mb-4">
+														Can't find the skill you need? Submit a proposal for admin review.
+												</p>
+												<form method="post" asp-page-handler="ProposeSkill">
+														<div class="mb-3">
+																<label asp-for="ProposeName" class="form-label">
+																		Skill Name <span class="text-danger">*</span>
+																</label>
+																<input asp-for="ProposeName" class="form-control"
+																			 placeholder="e.g. Kubernetes, Public Speaking" />
+														</div>
+														<div class="mb-3">
+																<label asp-for="ProposeDescription" class="form-label">
+																		Description <span class="text-danger">*</span>
+																</label>
+																<textarea asp-for="ProposeDescription" class="form-control" rows="3"
+																					placeholder="Brief description of this skill"></textarea>
+														</div>
+														@if (Model.Categories.Any())
+														{
+																<div class="mb-3">
+																		<label class="form-label">Categories</label>
+																		<div class="d-flex flex-wrap gap-3">
+																				@foreach (var cat in Model.Categories)
+																				{
+																						<div class="form-check">
+																								<input type="checkbox" class="form-check-input"
+																											 name="ProposeCategoryIds" value="@cat.Id"
+																											 id="cat_@cat.Id" />
+																								<label class="form-check-label" for="cat_@cat.Id">@cat.Name</label>
+																						</div>
+																				}
+																		</div>
+																</div>
+														}
+														<div class="mb-4">
+																<label asp-for="ProposeTags" class="form-label">Tags</label>
+																<input asp-for="ProposeTags" class="form-control"
+																			 placeholder="backend, cloud, framework (comma-separated)" />
+																<div class="form-text">Comma-separated tags to help categorise this skill.</div>
+														</div>
+														<button type="submit" class="btn btn-primary">Submit Proposal</button>
+												</form>
+										</div>
+								</div>
+						</div>
+				</div>
+		</div>
+</div>
+
+<!-- Add Skill Modal -->
+<div class="modal fade" id="addSkillModal" tabindex="-1">
+		<div class="modal-dialog">
+				<div class="modal-content">
+						<div class="modal-header">
+								<h5 class="modal-title">Add <span id="addSkillNameDisplay"></span></h5>
+								<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+						</div>
+						<form method="post" asp-page-handler="AddSkill">
+								<div class="modal-body">
+										<input type="hidden" asp-for="AddSkillId" id="addSkillIdInput" />
+										<div class="mb-3">
+												<label asp-for="AddLevel" class="form-label">Skill Level</label>
+												<select asp-for="AddLevel" class="form-select"
+																asp-items="Html.GetEnumSelectList<SkillLevel>()"></select>
+										</div>
+										<div class="mb-3">
+												<label asp-for="AddYearsExperience" class="form-label">Years of Experience</label>
+												<input asp-for="AddYearsExperience" type="number" min="0" max="50" class="form-control"
+															 placeholder="Optional" />
+										</div>
+								</div>
+								<div class="modal-footer">
+										<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+										<button type="submit" class="btn btn-primary">Add to Profile</button>
+								</div>
+						</form>
+				</div>
+		</div>
+</div>
+
+<!-- Edit Skill Modal -->
+<div class="modal fade" id="editSkillModal" tabindex="-1">
+		<div class="modal-dialog">
+				<div class="modal-content">
+						<div class="modal-header">
+								<h5 class="modal-title">Edit <span id="editSkillNameDisplay"></span></h5>
+								<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+						</div>
+						<form method="post" asp-page-handler="UpdateSkill">
+								<div class="modal-body">
+										<input type="hidden" asp-for="UpdateSkillId" id="updateSkillIdInput" />
+										<div class="mb-3">
+												<label asp-for="UpdateLevel" class="form-label">Skill Level</label>
+												<select asp-for="UpdateLevel" class="form-select" id="updateLevelSelect"
+																asp-items="Html.GetEnumSelectList<SkillLevel>()"></select>
+										</div>
+										<div class="mb-3">
+												<label asp-for="UpdateYearsExperience" class="form-label">Years of Experience</label>
+												<input asp-for="UpdateYearsExperience" type="number" min="0" max="50"
+															 class="form-control" id="updateYearsInput" placeholder="Optional" />
+										</div>
+								</div>
+								<div class="modal-footer">
+										<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+										<button type="submit" class="btn btn-primary">Save Changes</button>
+								</div>
+						</form>
+				</div>
+		</div>
+</div>
+
+@section Scripts {
+		<script>
+				// Activate the correct tab after a form post
+				(function () {
+						var activeTab = '@Model.ActiveTab';
+						var tabBtn = document.querySelector('[data-bs-target="#' + activeTab + '"]');
+						if (tabBtn) bootstrap.Tab.getOrCreateInstance(tabBtn).show();
+				})();
+
+				function showTab(id) {
+						var tabBtn = document.querySelector('[data-bs-target="#' + id + '"]');
+						if (tabBtn) bootstrap.Tab.getOrCreateInstance(tabBtn).show();
+				}
+
+				// Client-side search + category filter
+				var searchInput = document.getElementById('skillSearch');
+				var categoryFilter = document.getElementById('categoryFilter');
+
+				function filterSkills() {
+						var query = searchInput ? searchInput.value.toLowerCase() : '';
+						var category = categoryFilter ? categoryFilter.value : '';
+						var cards = document.querySelectorAll('.skill-card');
+						var visible = 0;
+
+						cards.forEach(function (card) {
+								var name = card.dataset.name || '';
+								var categories = card.dataset.categories || '';
+								var tags = card.dataset.tags || '';
+
+								var matchesSearch = !query || name.includes(query) || tags.includes(query);
+								var matchesCategory = !category || categories.includes(category);
+
+								var show = matchesSearch && matchesCategory;
+								card.style.display = show ? '' : 'none';
+								if (show) visible++;
+						});
+
+						var noResults = document.getElementById('noResultsMsg');
+						if (noResults) noResults.style.display = visible === 0 ? '' : 'none';
+				}
+
+				if (searchInput) searchInput.addEventListener('input', filterSkills);
+				if (categoryFilter) categoryFilter.addEventListener('change', filterSkills);
+
+				// Add skill modal
+				function openAddModal(skillId, skillName) {
+						document.getElementById('addSkillIdInput').value = skillId;
+						document.getElementById('addSkillNameDisplay').textContent = skillName;
+						document.getElementById('AddLevel').value = '1';
+						document.getElementById('AddYearsExperience').value = '';
+						bootstrap.Modal.getOrCreateInstance(document.getElementById('addSkillModal')).show();
+				}
+
+				// Edit skill modal
+				function openEditModal(skillId, skillName, level, years) {
+						document.getElementById('updateSkillIdInput').value = skillId;
+						document.getElementById('editSkillNameDisplay').textContent = skillName;
+						document.getElementById('updateLevelSelect').value = String(level);
+						document.getElementById('updateYearsInput').value = (years !== null && years !== undefined) ? String(years) : '';
+						bootstrap.Modal.getOrCreateInstance(document.getElementById('editSkillModal')).show();
+				}
+		</script>
 }

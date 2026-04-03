@@ -73,6 +73,23 @@ namespace MentoringApp.Api.Controllers
 		}
 
 		/// <summary>
+		/// GET /api/skills/categories
+		/// Returns all skill categories.
+		/// </summary>
+		[HttpGet("categories")]
+		public async Task<ActionResult<List<SkillCategoryDto>>> GetCategories(
+			CancellationToken cancellationToken = default)
+		{
+			var categories = await _skillService.GetCategoriesAsync();
+			return Ok(categories.Select(c => new SkillCategoryDto
+			{
+				Id = c.Id,
+				Name = c.Name,
+				Description = c.Description
+			}).ToList());
+		}
+
+		/// <summary>
 		/// POST /api/skills
 		/// Creates a new skill (Pending status). Requires authentication.
 		/// </summary>

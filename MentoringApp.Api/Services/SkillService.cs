@@ -1,4 +1,4 @@
-﻿using MentoringApp.Api.Data;
+using MentoringApp.Api.Data;
 using MentoringApp.Api.DTOs.Skills;
 using MentoringApp.Api.Enums;
 using MentoringApp.Api.Models;
@@ -129,6 +129,7 @@ namespace MentoringApp.Api.Services
 		{
 			var skill = await _db.Skills
 				.Include(s => s.Tags)
+				.Include(s => s.Categories)
 				.FirstOrDefaultAsync(s => s.Id == skillId);
 
 			if (skill == null)
@@ -147,9 +148,18 @@ namespace MentoringApp.Api.Services
 			{
 				var tags = await GetOrCreateTagsAsync(dto.Tags);
 				foreach (var tag in tags)
-				{
 					skill.Tags.Add(tag);
-				}
+			}
+
+			// update categories
+			skill.Categories.Clear();
+			if (dto.CategoryIds.Any())
+			{
+				var categories = await _db.SkillCategories
+					.Where(c => dto.CategoryIds.Contains(c.Id))
+					.ToListAsync();
+				foreach (var category in categories)
+					skill.Categories.Add(category);
 			}
 
 			await _db.SaveChangesAsync();
@@ -231,6 +241,11 @@ namespace MentoringApp.Api.Services
 			await _db.SaveChangesAsync();
 
 			return existing.Concat(newTags).ToList();
+		}
+
+		public async Task<List<SkillCategory>> GetCategoriesAsync()
+		{
+			return await _db.SkillCategories.OrderBy(c => c.Name).ToListAsync();
 		}
 	}
 }

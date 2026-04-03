@@ -107,7 +107,7 @@ namespace MentoringApp.Api.Controllers
 			// Actually sign in the user to create the authentication cookie
 			await _signInManager.SignInAsync(user, isPersistent: true);
 
-			var accessToken = GenerateJwtToken(user);
+			var accessToken = await GenerateJwtTokenAsync(user);
 
 			// generate and persist refresh token
 			var refreshToken = GenerateRefreshToken();
@@ -186,7 +186,7 @@ namespace MentoringApp.Api.Controllers
 				Expires = newRefresh.ExpiresAt
 			});
 
-			var newAccess = GenerateJwtToken(user);
+			var newAccess = await GenerateJwtTokenAsync(user);
 
 			return Ok(new AuthResponseDto
 			{
@@ -221,7 +221,7 @@ namespace MentoringApp.Api.Controllers
 			return Ok();
 		}
 
-		private string GenerateJwtToken(ApplicationUser user)
+		private async Task<string> GenerateJwtTokenAsync(ApplicationUser user)
 		{
 			// Ensure configuration values are present to avoid passing null to Encoding.GetBytes
 			var keyValue = _config["Jwt:Key"] ?? throw new InvalidOperationException("Configuration value 'Jwt:Key' is not set.");
@@ -233,6 +233,10 @@ namespace MentoringApp.Api.Controllers
 																new Claim(JwtRegisteredClaimNames.Sub, user.Id),
 																new Claim(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty)
 												};
+
+			var roles = await _userManager.GetRolesAsync(user);
+			foreach (var role in roles)
+				claims.Add(new Claim(ClaimTypes.Role, role));
 
 			var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(keyValue));
 			var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);

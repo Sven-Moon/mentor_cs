@@ -25,3 +25,4 @@ packages/
 *.coverage
 *.coveragexml
 *.log
+/.claude/settings.local.json

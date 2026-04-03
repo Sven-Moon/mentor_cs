@@ -532,6 +532,43 @@ namespace MentoringApp.Api.Tests.Services
 
 		#endregion
 
+		#region GetCategoriesAsync
+
+		[Fact]
+		public async Task GetCategoriesAsync_ReturnsAllCategories()
+		{
+			await SeedCategoryAsync("Backend");
+			await SeedCategoryAsync("Frontend");
+
+			var result = await _sut.GetCategoriesAsync();
+
+			Assert.Equal(2, result.Count);
+		}
+
+		[Fact]
+		public async Task GetCategoriesAsync_ReturnsOrderedByName()
+		{
+			await SeedCategoryAsync("Zulu");
+			await SeedCategoryAsync("Alpha");
+			await SeedCategoryAsync("Mike");
+
+			var result = await _sut.GetCategoriesAsync();
+
+			Assert.Equal("Alpha", result[0].Name);
+			Assert.Equal("Mike", result[1].Name);
+			Assert.Equal("Zulu", result[2].Name);
+		}
+
+		[Fact]
+		public async Task GetCategoriesAsync_NoCategories_ReturnsEmptyList()
+		{
+			var result = await _sut.GetCategoriesAsync();
+
+			Assert.Empty(result);
+		}
+
+		#endregion
+
 		#region GetOrCreateTagsAsync
 
 		[Fact]

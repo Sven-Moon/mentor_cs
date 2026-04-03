@@ -1,5 +1,7 @@
-﻿using MentoringApp.Api.DTOs.Auth;
+using MentoringApp.Api.DTOs.Auth;
 using MentoringApp.Api.DTOs.Profiles;
+using MentoringApp.Api.DTOs.Skills;
+using MentoringApp.Api.DTOs.UserSkills;
 
 namespace MentoringApp.Ui.Services
 {
@@ -50,11 +52,77 @@ namespace MentoringApp.Ui.Services
         {
             await PostJsonAsync("/api/profile", dto);
         }
-		#endregion profile
+        #endregion profile
 
-		#region Helpers
+        #region Skills
+        public async Task<List<SkillResponseDto>> GetAllSkillsAsync(bool approvedOnly = false)
+        {
+            return await GetJsonAsync<List<SkillResponseDto>>($"/api/skills?approvedOnly={approvedOnly}");
+        }
 
-		private async Task<T> GetJsonAsync<T>(string url)
+        public async Task<List<SkillCategoryDto>> GetCategoriesAsync()
+        {
+            return await GetJsonAsync<List<SkillCategoryDto>>("/api/skills/categories");
+        }
+
+        public async Task<SkillResponseDto> CreateSkillAsync(SkillCreateDto dto)
+        {
+            return await PostJsonResultAsync<SkillCreateDto, SkillResponseDto>("/api/skills", dto);
+        }
+        #endregion skills
+
+        #region UserSkills
+        public async Task<List<MentoringApp.Api.DTOs.UserSkills.UserSkillDto>> GetMySkillsAsync()
+        {
+            return await GetJsonAsync<List<MentoringApp.Api.DTOs.UserSkills.UserSkillDto>>("/api/users/me/skills");
+        }
+
+        public async Task AddUserSkillAsync(MentoringApp.Api.DTOs.UserSkills.AddUserSkillDto dto)
+        {
+            await PostJsonAsync("/api/users/me/skills", dto);
+        }
+
+        public async Task UpdateUserSkillAsync(int skillId, UpdateUserSkillDto dto)
+        {
+            await PutJsonAsync($"/api/users/me/skills/{skillId}", dto);
+        }
+
+        public async Task RemoveUserSkillAsync(int skillId)
+        {
+            await DeleteAsync($"/api/users/me/skills/{skillId}");
+        }
+        #endregion userSkills
+
+        #region AdminSkills
+        public async Task<List<SkillResponseDto>> GetPendingSkillsAsync()
+        {
+            return await GetJsonAsync<List<SkillResponseDto>>("/api/admin/skills/pending");
+        }
+
+        public async Task ApproveSkillAsync(int skillId)
+        {
+            await PostAsync($"/api/admin/skills/{skillId}/approve");
+        }
+
+        public async Task ApproveSkillWithEditsAsync(int skillId, SkillModerationDto dto)
+        {
+            await PutJsonAsync($"/api/admin/skills/{skillId}/approve", dto);
+        }
+
+        public async Task RejectSkillAsync(int skillId)
+        {
+            await PostAsync($"/api/admin/skills/{skillId}/reject");
+        }
+
+        public async Task MarkSkillAsDuplicateAsync(int skillId, int existingSkillId)
+        {
+            await PostJsonAsync($"/api/admin/skills/{skillId}/duplicate", new MarkDuplicateDto { ExistingSkillId = existingSkillId });
+        }
+        #endregion adminSkills
+
+        #region Helpers
+
+        private async Task<T> GetJsonAsync<T>(string url)
         {
             var response = await SendAsync(HttpMethod.Get, url);
             await EnsureSuccess(response);
@@ -64,6 +132,26 @@ namespace MentoringApp.Ui.Services
         private async Task PostJsonAsync<TDto>(string url, TDto dto)
         {
             var response = await PostAsync(url, dto);
+            await EnsureSuccess(response);
+        }
+
+        private async Task<TResult> PostJsonResultAsync<TDto, TResult>(string url, TDto dto)
+        {
+            var response = await PostAsync(url, dto);
+            await EnsureSuccess(response);
+            return (await response.Content.ReadFromJsonAsync<TResult>())!;
+        }
+
+        private async Task PutJsonAsync<TDto>(string url, TDto dto)
+        {
+            var content = JsonContent.Create(dto);
+            var response = await SendAsync(HttpMethod.Put, url, content);
+            await EnsureSuccess(response);
+        }
+
+        private async Task DeleteAsync(string url)
+        {
+            var response = await SendAsync(HttpMethod.Delete, url);
             await EnsureSuccess(response);
         }
 
@@ -91,18 +179,14 @@ namespace MentoringApp.Ui.Services
         {
             using var request = new HttpRequestMessage(method, url) { Content = content };
 
-            // forward Authorization and Cookie headers from the current HTTP context if available.
+            // Forward JWT from session as Authorization header.
             var ctx = _httpContextAccessor.HttpContext;
             if (ctx != null)
             {
-                if (ctx.Request.Headers.TryGetValue("Authorization", out var authValues) && !string.IsNullOrEmpty(authValues))
+                var token = ctx.Session.GetString("Jwt");
+                if (!string.IsNullOrEmpty(token))
                 {
-                    request.Headers.TryAddWithoutValidation("Authorization", authValues.ToString());
-                }
-
-                if (ctx.Request.Headers.TryGetValue("Cookie", out var cookieValues) && !string.IsNullOrEmpty(cookieValues))
-                {
-                    request.Headers.TryAddWithoutValidation("Cookie", cookieValues.ToString());
+                    request.Headers.TryAddWithoutValidation("Authorization", $"Bearer {token}");
                 }
             }
 

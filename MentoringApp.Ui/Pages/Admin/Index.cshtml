@@ -1,5 +1,25 @@
-﻿@page
+@page
 @model IndexModel
-<h1>Admin</h1>
 @{
+		ViewData["Title"] = "Admin";
 }
+
+<h1 class="mb-4">Admin Dashboard</h1>
+
+<div class="row g-3">
+		<div class="col-md-4">
+				<div class="card h-100">
+						<div class="card-body">
+								<h5 class="card-title">Skill Moderation</h5>
+								<p class="card-text text-muted">
+										Review, approve, edit, reject, or deduplicate user-submitted skill proposals.
+								</p>
+						</div>
+						<div class="card-footer">
+								<a asp-page="/Admin/Skills/Index" class="btn btn-primary btn-sm">
+										Manage Skills
+								</a>
+						</div>
+				</div>
+		</div>
+</div>

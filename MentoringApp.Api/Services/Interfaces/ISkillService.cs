@@ -15,5 +15,6 @@ namespace MentoringApp.Api.Services.Interfaces
 		Task RejectSkillAsync(int skillId);
 		Task MarkSkillAsDuplicateAsync(int skillId, int existingSkillId);
 		Task<List<Tag>> GetOrCreateTagsAsync(List<string> tagNames);
+		Task<List<SkillCategory>> GetCategoriesAsync();
 	}
 }
