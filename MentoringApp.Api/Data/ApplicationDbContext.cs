@@ -15,6 +15,7 @@ namespace MentoringApp.Api.Data
 		public DbSet<SkillCategory> SkillCategories { get; set; }
 		public DbSet<Tag> Tags { get; set; }
 		public DbSet<Mentorship> Mentorships { get; set; }
+		public DbSet<Session> Sessions { get; set; }
 		public DbSet<Testimonial> Testimonials { get; set; }
 		public DbSet<RefreshToken> RefreshTokens { get; set; }
 
@@ -146,6 +147,19 @@ namespace MentoringApp.Api.Data
 						.HasColumnType("xid")
 						.IsRowVersion();
 				}
+			});
+
+			// -------------------------------------
+			// SESSIONS
+			// -------------------------------------
+			modelBuilder.Entity<Session>(entity =>
+			{
+				entity.HasKey(s => s.Id);
+
+				entity.HasOne(s => s.Mentorship)
+					.WithMany(m => m.Sessions)
+					.HasForeignKey(s => s.MentorshipId)
+					.OnDelete(DeleteBehavior.Cascade);
 			});
 
 			// -------------------------------------
