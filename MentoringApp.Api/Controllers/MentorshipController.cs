@@ -93,7 +93,8 @@ namespace MentoringApp.Api.Controllers
 				Scope = dto.Scope,
 				Status = dto.Status,
 				StartDate = dto.StartDate,
-				EndDate = dto.EndDate
+				EndDate = dto.EndDate,
+				LastInteractionDate = dto.LastInteractionDate
 				// ❌ Do NOT set navigation properties
 				// ❌ Do NOT set RowVersion
 			};
@@ -140,6 +141,7 @@ namespace MentoringApp.Api.Controllers
 			mentorship.StartDate = updated.StartDate;
 			mentorship.EndDate = updated.EndDate;
 			mentorship.Status = updated.Status;
+			mentorship.LastInteractionDate = updated.LastInteractionDate;
 
 			// row version
 			if (_db.Database.IsNpgsql())

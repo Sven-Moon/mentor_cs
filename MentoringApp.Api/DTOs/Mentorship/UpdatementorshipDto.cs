@@ -5,5 +5,6 @@
 		public string? Status { get; set; }
 		public string? Scope { get; set; }
 		public DateTime? EndDate { get; set; }
+		public DateTime? LastInteractionDate { get; set; }
 	}
 }

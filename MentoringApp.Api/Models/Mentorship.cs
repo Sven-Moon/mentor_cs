@@ -11,6 +11,7 @@ namespace MentoringApp.Api.Models
 
 		public DateTime StartDate { get; set; }
 		public DateTime EndDate { get; set; }
+		public DateTime? LastInteractionDate { get; set; }
 		public required string Status { get; set; } // e.g., "Active", "Completed", "Cancelled"
 
 		// Navigation properties
@@ -19,5 +20,6 @@ namespace MentoringApp.Api.Models
 
 		// Collection of testimonials related to this mentorship
 		public ICollection<Testimonial> Testimonials { get; set; } = new List<Testimonial>();
+		public ICollection<Session> Sessions { get; set; } = new List<Session>();
 	}
 }

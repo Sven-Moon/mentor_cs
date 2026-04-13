@@ -10,6 +10,7 @@
 
 		public DateTime StartDate { get; set; }
 		public DateTime EndDate { get; set; }
+		public DateTime? LastInteractionDate { get; set; }
 		public TestimonialDto[] Testimonials { get; set; } = Array.Empty<TestimonialDto>();
 
 		// Concurrency token (required for PUT)
