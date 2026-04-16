@@ -23,6 +23,7 @@ namespace MentoringApp.Api.Models
 		public ICollection<Session> Sessions { get; set; } = new List<Session>();
 		public ICollection<Goal> Goals { get; set; } = new List<Goal>();
 		public ICollection<Milestone> Milestones { get; set; } = new List<Milestone>();
+		public ICollection<Skill> Skills { get; set; } = new List<Skill>();
 		public ICollection<Note> Notes { get; set; } = new List<Note>();
 	}
 }

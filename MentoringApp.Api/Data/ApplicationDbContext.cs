@@ -152,6 +152,11 @@ namespace MentoringApp.Api.Data
 				}
 			});
 
+			modelBuilder.Entity<Mentorship>()
+				.HasMany(m => m.Skills)
+				.WithMany(s => s.Mentorships)
+				.UsingEntity(j => j.ToTable("MentorshipSkills"));
+
 			// -------------------------------------
 			// GOALS
 			// -------------------------------------

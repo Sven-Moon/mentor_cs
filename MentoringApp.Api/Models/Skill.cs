@@ -19,6 +19,7 @@ namespace MentoringApp.Api.Models
 		// Navigation properties for many-to-many relationships
 		public virtual ICollection<UserSkill> UserSkills { get; set; } = new List<UserSkill>();		
 		public ICollection<SkillCategory> Categories { get; set; } = new List<SkillCategory>();
+		public ICollection<Mentorship> Mentorships { get; set; } = new List<Mentorship>();
 		public ICollection<Tag> Tags { get; set; } = new List<Tag>();
 	}
 }
