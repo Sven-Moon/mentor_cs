@@ -16,6 +16,9 @@ namespace MentoringApp.Api.Data
 		public DbSet<Tag> Tags { get; set; }
 		public DbSet<Mentorship> Mentorships { get; set; }
 		public DbSet<Session> Sessions { get; set; }
+		public DbSet<Goal> Goals { get; set; }
+		public DbSet<Milestone> Milestones { get; set; }
+		public DbSet<Note> Notes { get; set; }
 		public DbSet<Testimonial> Testimonials { get; set; }
 		public DbSet<RefreshToken> RefreshTokens { get; set; }
 
@@ -147,6 +150,64 @@ namespace MentoringApp.Api.Data
 						.HasColumnType("xid")
 						.IsRowVersion();
 				}
+			});
+
+			// -------------------------------------
+			// GOALS
+			// -------------------------------------
+			modelBuilder.Entity<Goal>(entity =>
+			{
+				entity.HasKey(g => g.Id);
+
+				entity.Property(g => g.Status)
+					.HasConversion<int>();
+
+				entity.HasOne(g => g.Mentorship)
+					.WithMany(m => m.Goals)
+					.HasForeignKey(g => g.MentorshipId)
+					.OnDelete(DeleteBehavior.Cascade);
+			});
+
+			// -------------------------------------
+			// MILESTONES
+			// -------------------------------------
+			modelBuilder.Entity<Milestone>(entity =>
+			{
+				entity.HasKey(ms => ms.Id);
+
+				entity.HasOne(ms => ms.Mentorship)
+					.WithMany(m => m.Milestones)
+					.HasForeignKey(ms => ms.MentorshipId)
+					.OnDelete(DeleteBehavior.Cascade);
+			});
+
+
+			// -------------------------------------
+			// NOTES
+			// -------------------------------------
+			modelBuilder.Entity<Note>(entity =>
+			{
+				entity.HasKey(n => n.Id);
+
+				entity.HasOne(n => n.Mentorship)
+					.WithMany(m => m.Notes)
+					.HasForeignKey(n => n.MentorshipId)
+					.OnDelete(DeleteBehavior.Cascade);
+
+				entity.HasOne(n => n.Author)
+					.WithMany(u => u.NotesAuthored)
+					.HasForeignKey(n => n.AuthorId)
+					.OnDelete(DeleteBehavior.Restrict);
+
+				entity.Property(n => n.Content)
+					.IsRequired()
+					.HasMaxLength(1000);
+
+				entity.Property(n => n.CreatedAt)
+					.IsRequired();
+
+				entity.Property(n => n.UpdatedAt)
+					.IsRequired();
 			});
 
 			// -------------------------------------

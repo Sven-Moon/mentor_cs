@@ -17,6 +17,7 @@ namespace MentoringApp.Api.Identity
 
 		public ICollection<Testimonial> ReceivedTestimonials { get; set; } = new List<Testimonial>(); // Testimonials received by this user
 		public ICollection<Testimonial> WrittenTestimonials { get; set; } = new List<Testimonial>(); // Testimonials given by this user
+		public ICollection<Note> NotesAuthored { get; set; } = new List<Note>(); // Notes authored by this user
 
 		#endregion collections
 	}
