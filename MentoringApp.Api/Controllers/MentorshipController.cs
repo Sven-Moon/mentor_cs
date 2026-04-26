@@ -80,9 +80,9 @@ namespace MentoringApp.Api.Controllers
 				MenteeId = dto.MenteeId,
 				Scope = dto.Scope,
 				Status = dto.Status,
-				StartDate = dto.StartDate,
-				EndDate = dto.EndDate,
-				LastInteractionDate = dto.LastInteractionDate
+				StartDate = ToUtc(dto.StartDate),
+				EndDate = ToUtc(dto.EndDate),
+				LastInteractionDate = ToUtc(dto.LastInteractionDate)
 			};
 
 			_db.Mentorships.Add(entity);
@@ -107,10 +107,10 @@ namespace MentoringApp.Api.Controllers
 				return Forbid();
 
 			mentorship.Scope = updated.Scope;
-			mentorship.StartDate = updated.StartDate;
-			mentorship.EndDate = updated.EndDate;
+			mentorship.StartDate = ToUtc(updated.StartDate);
+			mentorship.EndDate = ToUtc(updated.EndDate);
 			mentorship.Status = updated.Status;
-			mentorship.LastInteractionDate = updated.LastInteractionDate;
+			mentorship.LastInteractionDate = ToUtc(updated.LastInteractionDate);
 
 			if (_db.Database.IsNpgsql())
 			{
@@ -530,6 +530,14 @@ namespace MentoringApp.Api.Controllers
 				return Forbid();
 			return null;
 		}
+
+		private static DateTime ToUtc(DateTime dt) =>
+			dt.Kind == DateTimeKind.Unspecified
+				? DateTime.SpecifyKind(dt, DateTimeKind.Utc)
+				: dt.ToUniversalTime();
+
+		private static DateTime? ToUtc(DateTime? dt) =>
+			dt.HasValue ? ToUtc(dt.Value) : null;
 
 		private static GoalDto ToDto(Goal g) => new()
 		{

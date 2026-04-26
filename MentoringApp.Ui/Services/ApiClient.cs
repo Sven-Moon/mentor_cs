@@ -1,4 +1,5 @@
 using MentoringApp.Api.DTOs.Auth;
+using MentoringApp.Api.DTOs.Mentorship;
 using MentoringApp.Api.DTOs.Profiles;
 using MentoringApp.Api.DTOs.Skills;
 using MentoringApp.Api.DTOs.UserSkills;
@@ -92,6 +93,25 @@ namespace MentoringApp.Ui.Services
             await DeleteAsync($"/api/users/me/skills/{skillId}");
         }
         #endregion userSkills
+
+        #region Admin
+        public async Task<List<UserSummary>> GetAdminUsersAsync()
+        {
+            return await GetJsonAsync<List<UserSummary>>("/api/admin/users");
+        }
+        #endregion admin
+
+        #region Mentorships
+        public async Task<List<MentorshipSummary>> GetMentorshipsAsync()
+        {
+            return await GetJsonAsync<List<MentorshipSummary>>("/api/mentorships");
+        }
+
+        public async Task<MentorshipDto> CreateMentorshipAsync(MentorshipDto dto)
+        {
+            return await PostJsonResultAsync<MentorshipDto, MentorshipDto>("/api/mentorships", dto);
+        }
+        #endregion mentorships
 
         #region AdminSkills
         public async Task<List<SkillResponseDto>> GetPendingSkillsAsync()
