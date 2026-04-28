@@ -41,32 +41,53 @@ namespace MentoringApp.Api.Controllers
 		[HttpGet]
 		public async Task<ActionResult<IEnumerable<MentorshipDto>>> GetMentorships()
 		{
-			IQueryable<Mentorship> query = _db.Mentorships
-				.Include(m => m.Mentor)
-				.Include(m => m.Mentee);
+			IQueryable<Mentorship> query = _db.Mentorships;
 
 			if (!IsAdmin)
 				query = query.Where(m => m.MentorId == UserId || m.MenteeId == UserId);
 
-			return Ok(await query.ToListAsync());
+			var result = await query.Select(m => new
+			{
+				m.Id,
+				m.MentorId,
+				m.MenteeId,
+				Mentor = new { m.Mentor.Id, m.Mentor.UserName },
+				Mentee = new { m.Mentee.Id, m.Mentee.UserName },
+				m.Scope,
+				m.Status,
+				m.StartDate,
+				m.EndDate,
+				m.LastInteractionDate
+			}).ToListAsync();
+
+			return Ok(result);
 		}
 
 		/// <summary>Get a single mentorship by ID.</summary>
 		[HttpGet("{id:int}")]
 		public async Task<ActionResult<MentorshipDto>> GetMentorship(int id)
 		{
-			var mentorship = await _db.Mentorships
-				.Include(m => m.Mentor)
-				.Include(m => m.Mentee)
-				.FirstOrDefaultAsync(m => m.Id == id);
+			var result = await _db.Mentorships.Where(m => m.Id == id).Select(m => new
+			{
+				m.Id,
+				m.MentorId,
+				m.MenteeId,
+				Mentor = new { m.Mentor.Id, m.Mentor.UserName },
+				Mentee = new { m.Mentee.Id, m.Mentee.UserName },
+				m.Scope,
+				m.Status,
+				m.StartDate,
+				m.EndDate,
+				m.LastInteractionDate
+			}).FirstOrDefaultAsync();
 
-			if (mentorship == null)
+			if (result == null)
 				return NotFound();
 
-			if (!IsAdmin && mentorship.MentorId != UserId && mentorship.MenteeId != UserId)
+			if (!IsAdmin && result.MentorId != UserId && result.MenteeId != UserId)
 				return Forbid();
 
-			return Ok(mentorship);
+			return Ok(result);
 		}
 
 		/// <summary>Create a mentorship (admin only).</summary>
